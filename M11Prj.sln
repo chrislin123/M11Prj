@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M11XML", "M11XML\M11XML.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M10.lib", "..\M10Service\M10.lib\M10.lib.csproj", "{255CE420-3148-456C-8492-461027AFE9F8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M11XmlHistory", "M11XmlHistory\M11XmlHistory.csproj", "{1AB0CD79-5E2C-4C2C-B767-E4B6B7C33785}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M11System", "M11System\M11System.csproj", "{4845D9D9-AB87-42F0-B468-C5077F4ADE8D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{255CE420-3148-456C-8492-461027AFE9F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{255CE420-3148-456C-8492-461027AFE9F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{255CE420-3148-456C-8492-461027AFE9F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AB0CD79-5E2C-4C2C-B767-E4B6B7C33785}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AB0CD79-5E2C-4C2C-B767-E4B6B7C33785}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AB0CD79-5E2C-4C2C-B767-E4B6B7C33785}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AB0CD79-5E2C-4C2C-B767-E4B6B7C33785}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4845D9D9-AB87-42F0-B468-C5077F4ADE8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4845D9D9-AB87-42F0-B468-C5077F4ADE8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4845D9D9-AB87-42F0-B468-C5077F4ADE8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4845D9D9-AB87-42F0-B468-C5077F4ADE8D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
