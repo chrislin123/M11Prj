@@ -14,37 +14,10 @@ using FluentFTP;
 using System.Net;
 using M11System;
 
-
-
 namespace M11XML
 {
     public partial class MainForm : BaseForm
     {
-        //string Path_Original = @"D:\M11\Data\Original";
-        //string Path_XmlResult = @"D:\M11\Data\XmlResult";
-        //string Path_FTPQueueTxtOriginal = @"D:\M11\Data\FTPQueueTxtOriginal";
-        //string Path_FTPQueueXmlResult = @"D:\M11\Data\FTPQueueXmlResult";
-        //string Path_FTPQueueTxtOriginalBak = @"D:\M11\Data\FTPQueueTxtOriginalBak";
-        //string Path_FTPQueueXmlResultBak = @"D:\M11\Data\FTPQueueXmlResultBak";
-        //string Path_DBSimulation = @"D:\M11\DBSimulation";
-        //string Path_XmlResultWeb = @"D:\M11\M11Web\M11Service\R01";
-
-        //string FilePath_SchemaCGIData = Path.Combine(@"D:\M11\DBSimulation", "Schema_CGIData.xml");
-        //string FilePath_SchemaSetSatation = Path.Combine(@"D:\M11\DBSimulation", "Schema_SetSatation.xml");
-        //string FilePath_SetSatation = Path.Combine(@"D:\M11\DBSimulation", "SetSatation.xml");
-        //string FilePath_SchemaSetSensor = Path.Combine(@"D:\M11\DBSimulation", "Schema_SetSensor.xml");
-        //string FilePath_SetSensor = Path.Combine(@"D:\M11\DBSimulation", "SetSensor.xml");
-
-        ////1040806 新的ftp主機
-        //string sIP = "140.116.38.196";
-        ////string sUser = "FCU2015";
-        ////string sPassword = "FCU2015";
-        ////之後新增一個M11專屬使用者
-        //string sUser = "admin";
-        //string sPassword = "@@hydjan222!!";
-
-
-
         public MainForm()
         {
             InitializeComponent();
@@ -62,9 +35,7 @@ namespace M11XML
             Directory.CreateDirectory(M11Const.Path_FTPQueueXmlResultBak);
             Directory.CreateDirectory(M11Const.Path_DBSimulation);
             Directory.CreateDirectory(M11Const.Path_XmlResultWeb);
-
-
-            
+            Directory.CreateDirectory(M11Const.Path_FTPQueueXmlResult7Day);
 
             try
             {
@@ -91,19 +62,12 @@ namespace M11XML
 
                 throw;
             }
-            //DateTime dtCheck = new DateTime(2021, 3, 17, 14, 10, 8);
-            //getRainGauge("XINZH_01", "RG", dtCheck);
-
-
-
-            
-
-            System.Threading.Thread.Sleep(5000);
-
-            this.Close();
+            finally 
+            {
+                System.Threading.Thread.Sleep(2000);
+                this.Close();
+            }            
         }
-
-
         
 
         DataTable dtStationData = null;
@@ -668,6 +632,9 @@ namespace M11XML
 
                         //儲存到準備FTP上傳路徑
                         doc.Save(Path.Combine(M11Const.Path_FTPQueueXmlResult, string.Format("{0}_{1}", dtCheck.ToString("yyyyMMddHHmm"), "10min_a_ds_data.xml")));
+
+                        //儲存到歷史路徑
+                        doc.Save(Path.Combine(M11Const.Path_FTPQueueXmlResult7Day, string.Format("{0}_{1}", dtCheck.ToString("yyyyMMddHHmm"), "10min_a_ds_data.xml")));
                     }
                 }
             }
