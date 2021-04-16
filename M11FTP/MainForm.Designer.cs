@@ -1,4 +1,4 @@
-﻿namespace M11XML
+﻿namespace M11FTP
 {
     partial class MainForm
     {

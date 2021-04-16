@@ -18,7 +18,8 @@ namespace M11System
         public static string Path_FTPQueueXmlResultBak = @"D:\M11\Data\FTPQueueXmlResultBak";
         public static string Path_FTPQueueXmlResult7Day = @"D:\M11\Data\FTPQueueXmlResult7Day";
         public static string Path_DBSimulation = @"D:\M11\DBSimulation";
-        public static string Path_XmlResultWeb = @"D:\M11\M11Web\M11Service\R01";
+        public static string Path_XmlResultWeb = @"D:\M11\M11Web\dsmon\am";
+        public static string Path_XmlResultWeb7Day = @"D:\M11\M11Web\dsmon\amhist";
 
         public static string FilePath_SchemaCGIData = Path.Combine(@"D:\M11\DBSimulation", "Schema_CGIData.xml");
         public static string FilePath_SchemaSetSatation = Path.Combine(@"D:\M11\DBSimulation", "Schema_SetSatation.xml");

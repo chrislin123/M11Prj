@@ -4,14 +4,12 @@ using M10.lib;
 using NLog;
 using System.Net;
 
-namespace M11XML
+namespace M11FTP
 {
     public class BaseForm : Form
     {
         private string _ConnectionString;
-        private string _ConnectionStringProcal;
         private DALDapper _dbDapper;
-        private DALDapper _dbDapperProcal;
         public string ssql = string.Empty;
         public Logger logger;
         private StockHelper _stockhelper;
@@ -29,6 +27,7 @@ namespace M11XML
             }
         }
 
+
         public string ConnectionString
         {
             get
@@ -39,32 +38,6 @@ namespace M11XML
                 }
 
                 return _ConnectionString;
-            }
-        }
-
-        public DALDapper dbDapperProcal
-        {
-            get
-            {
-                if (_dbDapperProcal == null)
-                {
-                    _dbDapperProcal = new DALDapper(ConnectionStringProcal);
-                }
-
-                return _dbDapperProcal;
-            }
-        }
-
-        public string ConnectionStringProcal
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_ConnectionStringProcal))
-                {
-                    _ConnectionStringProcal = ConfigurationManager.ConnectionStrings[ConfigurationManager.AppSettings["DBProcal"]].ConnectionString;
-                }
-
-                return _ConnectionStringProcal;
             }
         }
 

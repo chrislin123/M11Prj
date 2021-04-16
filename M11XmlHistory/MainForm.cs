@@ -29,6 +29,7 @@ namespace M11XmlHistory
             {
                 //建立必要資料夾
                 Directory.CreateDirectory(M11Const.Path_FTPQueueXmlResult7Day);
+                Directory.CreateDirectory(M11Const.Path_XmlResultWeb7Day);
 
                 //移除超過七天資料
                 //DateTime dtNow = DateTime.Now;
@@ -38,6 +39,34 @@ namespace M11XmlHistory
 
                 // 取得資料夾內所有檔案
                 foreach (string fname in Directory.GetFiles(M11Const.Path_FTPQueueXmlResult7Day))
+                {
+                    try
+                    {
+                        FileInfo fi = new FileInfo(fname);
+                        string[] XmlResultSplit = fi.Name.Replace(fi.Extension, "").Split('_');
+
+                        //避免舊檔案格式問題，排除沒有分析完整的檔案名稱
+                        if (XmlResultSplit.Length != 5) continue;
+
+                        //從檔案取得資料時間
+                        DateTime dt = DateTime.ParseExact(XmlResultSplit[0], "yyyyMMddHHmm", System.Globalization.CultureInfo.CurrentCulture);
+
+                        if (dt < dt7Day)
+                        {
+                            fi.Delete();
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        //有錯誤持續執行
+                        continue;
+                        //ShowMessageToFront(ex.ToString());
+                    }
+                }
+
+                // 刪除網站歷史7天以上的資料
+                foreach (string fname in Directory.GetFiles(M11Const.Path_XmlResultWeb7Day))
                 {
                     try
                     {
