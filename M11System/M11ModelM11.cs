@@ -115,6 +115,25 @@ namespace M11System.Model.M11
 
     }
 
+    /// <summary>
+    /// M11系統設定檔
+    /// </summary>
+    [Table("BasM11Setting")]
+    public class BasM11Setting
+    {
+        [Key]
+        public int no { get; set; }
+
+        public string DataType { get; set; }
+
+        public string DataRemark { get; set; }
+
+        public string DataItem { get; set; }
+
+        public string DataValue { get; set; }
+
+    }
+
 
 
 

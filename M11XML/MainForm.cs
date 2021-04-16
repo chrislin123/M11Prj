@@ -40,8 +40,8 @@ namespace M11XML
             Directory.CreateDirectory(M11Const.Path_FTPQueueXmlResult7Day);
 
 
-            //DateTime dtCheck = new DateTime(2021, 4, 13, 17, 30, 8);
-
+            //DateTime dtCheck = new DateTime(2021, 3, 13, 17, 30, 8);
+            //ReadOutDataToDB(dtCheck);
 
 
 
@@ -67,6 +67,9 @@ namespace M11XML
 
                 //讀取委外資料轉檔到XML資料庫
                 ReadOutDataToXMLDB();
+
+                //讀取委外資料轉檔到DB資料庫
+                ReadOutDataToDB(dtCheck);
 
                 //產生結果XML(每十分鐘)
                 ProcGenResultXML(dtCheck);
@@ -1661,6 +1664,94 @@ namespace M11XML
                     //寫入
                     dtStationData.WriteXml(Path.Combine(M11Const.Path_DBSimulation, string.Format("{0}.xml", StationName)));
                 }              
+            }
+            catch (Exception)
+            {
+
+
+            }
+        }
+
+        /// <summary>
+        /// 讀取委外資料轉檔到資料庫
+        /// </summary>
+        private void ReadOutDataToDB(DateTime dtCheck)
+        {
+            try
+            {
+                //取得下一個時段的時間
+                dtCheck = TransDatetimeToNextFullDatetime(dtCheck);
+                string sDatetimeString = M11DatetimeToString(dtCheck);
+
+                //取得下一個時段資料庫資料
+                ssql = @"
+                    select * from CgiStationData where DatetimeString = '{0}'                                                            
+                    ";
+                ssql = string.Format(ssql, sDatetimeString);
+                List<CgiStationData> lstCgiData = dbDapper.Query<CgiStationData>(ssql);
+
+                //取得Procal資料StationReal即時資料表(不判斷時間，如果盛邦未更新也繼續抓即時資料)
+                ssql = @"
+                            select * from StationReal 
+                        ";
+                List<StationReal> lstStationReal = dbDapperProcal.Query<StationReal>(ssql);
+
+
+                //取得Station與Procal的StationID設定檔
+                ssql = @"
+                            select * from BasM11Setting where DataType = 'StMapProcal'
+                        ";
+                List<BasM11Setting> lstStationMap = dbDapper.Query<BasM11Setting>(ssql);
+                
+                foreach (BasM11Setting StationMap in lstStationMap)
+                {
+                    string sCgi = "procal";
+                    string StationName = StationMap.DataItem;
+                    //取盛邦的站號來存
+                    string sID = StationMap.DataValue;
+
+                    List<StationReal> lstStationRealTmps =
+                            lstStationReal.Where(c => c.StationID == sID).ToList();
+
+                    foreach (StationReal sr in lstStationRealTmps)
+                    {
+                        string sDataType = "";
+                        if (sr.Title == "水位") sDataType = "WATER";
+                        if (sr.Title == "傾斜X") sDataType = "SX";
+                        if (sr.Title == "傾斜Y") sDataType = "SY";
+
+                        //如果資料類別沒對應上，則繼續
+                        if (sDataType == "") continue;
+
+                        //判斷資料是否存在
+                        List<CgiStationData> tmp
+                            = lstCgiData.Where(c => c.DataType == sDataType.ToUpper()
+                                && c.Station == StationName).ToList();
+
+                        ////寫入資料庫
+                        if (tmp.Count >= 1)
+                        {
+                            //更新資料
+                            CgiStationData tmpData = tmp[0];
+                            tmpData.Value = sr.RealVale.ToString();
+                            dbDapper.Update<CgiStationData>(tmpData);
+                        }
+                        else
+                        {
+                            //新增資料
+                            CgiStationData tmpData = new CgiStationData();
+                            tmpData.DatetimeString = sDatetimeString;
+                            tmpData.ID = sID;
+                            tmpData.Cgi = sCgi;
+                            tmpData.Station = StationName;
+                            tmpData.DataType = sDataType.ToUpper();
+                            tmpData.Value = sr.RealVale.ToString();
+                            dbDapper.Insert<CgiStationData>(tmpData);
+                        }
+                    }
+
+
+                }
             }
             catch (Exception)
             {
