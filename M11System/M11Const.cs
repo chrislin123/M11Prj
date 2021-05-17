@@ -17,9 +17,16 @@ namespace M11System
         public static string Path_FTPQueueXmlResult = @"D:\M11\Data\FTPQueueXmlResult";
         public static string Path_FTPQueueXmlResultBak = @"D:\M11\Data\FTPQueueXmlResultBak";
         public static string Path_FTPQueueXmlResult7Day = @"D:\M11\Data\FTPQueueXmlResult7Day";
+        public static string Path_FTPQueueCcdResult = @"D:\M11\Data\FTPQueueCcdResult";
+        public static string Path_CcdResultHist = @"D:\M11\Data\CcdResultHist";        
         public static string Path_DBSimulation = @"D:\M11\DBSimulation";
+
         public static string Path_XmlResultWeb = @"D:\M11\M11Web\dsmon\am";
         public static string Path_XmlResultWeb7Day = @"D:\M11\M11Web\dsmon\amhist";
+        public static string Path_PrecipitationWeb7Day = @"D:\M11\M11Web\dsmon\pmhist";
+        public static string Path_CcdResultWeb = @"D:\M11\M11Web\dsmon\vm";
+
+        public static string Path_CcdSource = @"D:\FTP\Data\cctv";
 
         public static string FilePath_SchemaCGIData = Path.Combine(@"D:\M11\DBSimulation", "Schema_CGIData.xml");
         public static string FilePath_SchemaSetSatation = Path.Combine(@"D:\M11\DBSimulation", "Schema_SetSatation.xml");
@@ -34,6 +41,8 @@ namespace M11System
         //之後新增一個M11專屬使用者
         public static string FTP_User = "admin";
         public static string FTP_Password = "@@hydjan222!!";
+
+        //public static string API_Status
 
 
 

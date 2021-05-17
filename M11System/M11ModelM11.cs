@@ -7,6 +7,9 @@ using Dapper.Contrib.Extensions;
 
 namespace M11System.Model.M11
 {
+
+    
+
     //設定key
     //[Key] //自動增加的key
     //[ExplicitKey] //非自動增加的key
@@ -90,6 +93,8 @@ namespace M11System.Model.M11
 
         public string SensorName { get; set; }
 
+        public string Active_YN { get; set; }
+
     }
 
     /// <summary>
@@ -112,6 +117,9 @@ namespace M11System.Model.M11
         public string DataType { get; set; }
 
         public string Value { get; set; }
+
+        //Y:有接收到CGI資料並更新，N:沒有接收到CGI資料抓前一個時刻的資料
+        public string Status { get; set; }
 
     }
 

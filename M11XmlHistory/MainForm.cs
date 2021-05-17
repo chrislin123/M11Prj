@@ -30,10 +30,12 @@ namespace M11XmlHistory
                 //建立必要資料夾
                 Directory.CreateDirectory(M11Const.Path_FTPQueueXmlResult7Day);
                 Directory.CreateDirectory(M11Const.Path_XmlResultWeb7Day);
+                Directory.CreateDirectory(M11Const.Path_PrecipitationWeb7Day);
 
-                //移除超過七天資料
-                //DateTime dtNow = DateTime.Now;
-                DateTime dtNow7D = DateTime.Now.AddDays(-7);
+                //移除超過七天資料                
+                //DateTime dtNow7D = DateTime.Now.AddDays(-7);
+                //20210429 改為30天
+                DateTime dtNow7D = DateTime.Now.AddDays(-30);
                 //
                 DateTime dt7Day = new DateTime(dtNow7D.Year, dtNow7D.Month, dtNow7D.Day, 0, 0, 0);
 
@@ -65,7 +67,7 @@ namespace M11XmlHistory
                     }
                 }
 
-                // 刪除網站歷史7天以上的資料
+                // 刪除網站[監測資料]歷史7天以上的資料
                 foreach (string fname in Directory.GetFiles(M11Const.Path_XmlResultWeb7Day))
                 {
                     try
@@ -93,18 +95,46 @@ namespace M11XmlHistory
                     }
                 }
 
-                //產生ZIP檔到Web路徑
-                string PathSource = M11Const.Path_FTPQueueXmlResult7Day;
-                string PathDest = Path.Combine(M11Const.Path_XmlResultWeb, "7Day_10min_a_ds_data.zip");
-
-                if (File.Exists(PathDest) == true)
+                // 刪除網站[氣象局資料]歷史7天以上的資料
+                foreach (string fname in Directory.GetFiles(M11Const.Path_PrecipitationWeb7Day))
                 {
-                    new FileInfo(PathDest).Delete();
-                    System.Threading.Thread.Sleep(2000);
+                    try
+                    {
+                        FileInfo fi = new FileInfo(fname);
+                        string[] XmlResultSplit = fi.Name.Replace(fi.Extension, "").Split('_');
+
+                        //避免舊檔案格式問題，排除沒有分析完整的檔案名稱
+                        if (XmlResultSplit.Length != 2) continue;
+
+                        //從檔案取得資料時間
+                        DateTime dt = DateTime.ParseExact(XmlResultSplit[0], "yyyyMMddHHmm", System.Globalization.CultureInfo.CurrentCulture);
+
+                        if (dt < dt7Day)
+                        {
+                            fi.Delete();
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        //有錯誤持續執行
+                        continue;
+                        //ShowMessageToFront(ex.ToString());
+                    }
                 }
 
-                // 壓縮目錄中檔案
-                ZipFile.CreateFromDirectory(PathSource, PathDest);
+                ////產生ZIP檔到Web路徑
+                //string PathSource = M11Const.Path_FTPQueueXmlResult7Day;
+                //string PathDest = Path.Combine(M11Const.Path_XmlResultWeb, "7Day_10min_a_ds_data.zip");
+
+                //if (File.Exists(PathDest) == true)
+                //{
+                //    new FileInfo(PathDest).Delete();
+                //    System.Threading.Thread.Sleep(2000);
+                //}
+
+                //// 壓縮目錄中檔案
+                //ZipFile.CreateFromDirectory(PathSource, PathDest);
 
                 // 解壓縮
                 //ZipFile.ExtractToDirectory(zipPath, extractPath);

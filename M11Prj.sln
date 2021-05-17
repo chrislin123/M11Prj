@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M11XmlHistory", "M11XmlHist
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M11System", "M11System\M11System.csproj", "{4845D9D9-AB87-42F0-B468-C5077F4ADE8D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M11MVC", "M11MVC\M11MVC.csproj", "{2A0962C9-97BB-4FB0-82E6-99D2EA1D79B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M11CCD", "M11CCD\M11CCD.csproj", "{02F4840D-3E8F-4E43-AC0B-D560AB5BA11A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +49,14 @@ Global
 		{4845D9D9-AB87-42F0-B468-C5077F4ADE8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4845D9D9-AB87-42F0-B468-C5077F4ADE8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4845D9D9-AB87-42F0-B468-C5077F4ADE8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A0962C9-97BB-4FB0-82E6-99D2EA1D79B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A0962C9-97BB-4FB0-82E6-99D2EA1D79B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A0962C9-97BB-4FB0-82E6-99D2EA1D79B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A0962C9-97BB-4FB0-82E6-99D2EA1D79B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02F4840D-3E8F-4E43-AC0B-D560AB5BA11A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02F4840D-3E8F-4E43-AC0B-D560AB5BA11A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02F4840D-3E8F-4E43-AC0B-D560AB5BA11A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02F4840D-3E8F-4E43-AC0B-D560AB5BA11A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

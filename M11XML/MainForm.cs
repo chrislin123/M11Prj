@@ -37,14 +37,16 @@ namespace M11XML
             Directory.CreateDirectory(M11Const.Path_DBSimulation);
             Directory.CreateDirectory(M11Const.Path_XmlResultWeb);
             Directory.CreateDirectory(M11Const.Path_XmlResultWeb7Day);
+            Directory.CreateDirectory(M11Const.Path_PrecipitationWeb7Day);
             Directory.CreateDirectory(M11Const.Path_FTPQueueXmlResult7Day);
 
 
             //DateTime dtCheck = new DateTime(2021, 3, 13, 17, 30, 8);
             //ReadOutDataToDB(dtCheck);
 
+            //ProcPreGetNextDataFromPreData();
 
-
+            //return;
             timer1.Enabled = true;
         }
 
@@ -58,15 +60,14 @@ namespace M11XML
 
                 DateTime dtCheck = DateTime.Now;
 
-
                 //產生Station設定檔中的XML
                 InitStationXML();
 
-                //讀取CGI原始資料轉檔到XML資料庫
+                //讀取CGI原始資料轉檔到XML資料庫與DB資料庫
                 ReadDataToXMLDB();
 
                 //讀取委外資料轉檔到XML資料庫
-                ReadOutDataToXMLDB();
+                //ReadOutDataToXMLDB();
 
                 //讀取委外資料轉檔到DB資料庫
                 ReadOutDataToDB(dtCheck);
@@ -146,27 +147,27 @@ namespace M11XML
             switch (SensorName)
             {
                 case "RG":
-                    sResult = getRainGauge(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
+                    //sResult = getRainGauge(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
+                    sResult = getRainGaugeFromDB(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
                     break;
                 case "TM":
                 case "TM1":
-                    sResult = getBiTiltMeter(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
+                    //sResult = getBiTiltMeter(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
+                    sResult = getBiTiltMeterFromDB(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
                     break;
                 case "TM2":
-                    sResult = getBiTiltMeter2(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData); 
+                    //sResult = getBiTiltMeter2(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
+                    sResult = getBiTiltMeter2FromDB(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
                     break;
                 case "GW":
-                    sResult = getObservationWell(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
+                    //sResult = getObservationWell(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
+                    sResult = getObservationWellFromDB(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
                     break;
                 case "PM":
-                    sResult = getPiezoMeter(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
+                    //sResult = getPiezoMeter(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
+                    sResult = getPiezoMeterFromDB(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
+                    
                     break;
-                //case "RG":
-                //    sResult = "RainGauge";
-                //    break;
-                //case "RG":
-                //    sResult = "RainGauge";
-                //    break;
                 default:
                     sResult = "";
                     break;
@@ -210,10 +211,10 @@ namespace M11XML
                 ssql = string.Format(ssql, StationName, SensorName, dtPre.ToString("yyyy-MM-dd HH:mm:00"));
 
                 Result10MinData qRd = dbDapper.QuerySingleOrDefault<Result10MinData>(ssql);
-
-                if (qRd != null && qRd.value != "")
+                
+                if (qRd != null && qRd.CgiData != "")
                 {
-                    sCgiData = qRd.value;
+                    sCgiData = qRd.CgiData;
                 }                
             }
             else
@@ -346,6 +347,11 @@ namespace M11XML
             //dRain72h = dtemp;
 
 
+            //計數值的單位(累積)
+            //double dValueUnit = 5;
+            // 20210420 計數單位5=>0.5
+            double dValueUnit = 0.5;
+
             //新計算方式，要跟前面的資料比對，才知道有沒有累積
             //10m
             dtemp = 0;
@@ -357,7 +363,7 @@ namespace M11XML
             //本次雨量資料-前10分鐘雨量資料 > 0 ，才累積
             if (dtemp10m - dtemp10mPre > 0)
             {
-                dRain10m = (dtemp10m - dtemp10mPre) * 5;
+                dRain10m = (dtemp10m - dtemp10mPre) * dValueUnit;
             }
 
             //1h
@@ -376,7 +382,7 @@ namespace M11XML
                     dtemp = dtemp + dLoopResult;
                 }                
             }
-            dRain1h = dtemp * 5;
+            dRain1h = dtemp * dValueUnit;
 
             //3h
             dtemp = 0;
@@ -394,7 +400,7 @@ namespace M11XML
                     dtemp = dtemp + dLoopResult;
                 }
             }
-            dRain3h = dtemp * 5;
+            dRain3h = dtemp * dValueUnit;
 
 
             //6h
@@ -413,7 +419,7 @@ namespace M11XML
                     dtemp = dtemp + dLoopResult;
                 }
             }
-            dRain6h = dtemp * 5;
+            dRain6h = dtemp * dValueUnit;
 
             //12h
             dtemp = 0;
@@ -431,7 +437,7 @@ namespace M11XML
                     dtemp = dtemp + dLoopResult;
                 }
             }
-            dRain12h = dtemp * 5;
+            dRain12h = dtemp * dValueUnit;
 
             //24h
             dtemp = 0;
@@ -449,7 +455,7 @@ namespace M11XML
                     dtemp = dtemp + dLoopResult;
                 }
             }
-            dRain24h = dtemp * 5;
+            dRain24h = dtemp * dValueUnit;
 
             //48h
             dtemp = 0;
@@ -467,7 +473,7 @@ namespace M11XML
                     dtemp = dtemp + dLoopResult;
                 }
             }
-            dRain48h = dtemp * 5;
+            dRain48h = dtemp * dValueUnit;
 
             //72h
             dtemp = 0;
@@ -485,8 +491,207 @@ namespace M11XML
                     dtemp = dtemp + dLoopResult;
                 }
             }
-            dRain72h = dtemp * 5;
+            dRain72h = dtemp * dValueUnit;
 
+
+            //四捨五入小數點1位
+            dRain10m = Math.Round(dRain10m, 1);
+            dRain1h = Math.Round(dRain1h, 1);
+            dRain3h = Math.Round(dRain3h, 1);
+            dRain6h = Math.Round(dRain6h, 1);
+            dRain12h = Math.Round(dRain12h, 1);
+            dRain24h = Math.Round(dRain24h, 1);
+            dRain48h = Math.Round(dRain48h, 1);
+            dRain72h = Math.Round(dRain72h, 1);
+
+            sRain10m = dRain10m.ToString();
+            sRain1h = dRain1h.ToString();
+            sRain3h = dRain3h.ToString();
+            sRain6h = dRain6h.ToString();
+            sRain12h = dRain12h.ToString();
+            sRain24h = dRain24h.ToString();
+            sRain48h = dRain48h.ToString();
+            sRain72h = dRain72h.ToString();
+
+            sResult = string.Format("{0} {1} {2} {3} {4} {5} {6} {7}"
+                , sRain10m, sRain1h, sRain3h, sRain6h, sRain12h, sRain24h, sRain48h, sRain72h);
+
+            return sResult;
+        }
+
+        /// <summary>
+        /// 取得雨量資料結果(RG)
+        /// </summary>
+        /// <param name="StationName">站名</param>
+        /// <param name="SensorName">儀器名稱</param>
+        /// <param name="dtCheck">比對時間點</param>
+        /// <returns></returns>
+        private string getRainGaugeFromDB(BasStationSensor SensorRow, DateTime dtCheck, ref DateTime dtGetDataTime, ref string sCgiData)
+        {
+            string sResult = "";
+            string StationName = SensorRow.Station;
+            string SensorName = SensorRow.Sensor;
+
+            //[RAIN]
+            ssql = @"
+                    select * from CgiStationData where Station = '{0}' and datatype = 'RAIN' order by DatetimeString asc                                                       
+                    ";
+            ssql = string.Format(ssql, StationName);
+            List<CgiStationData> lstData = dbDapper.Query<CgiStationData>(ssql);
+
+            if (lstData.Count == 0 )
+            {
+                sResult = string.Format("{0} {1} {2} {3} {4} {5} {6} {7}"
+                , 0, 0, 0, 0, 0, 0, 0, 0);
+                sCgiData = "0";
+                return sResult;
+            }
+
+            ////取得目前時段CGI的資料
+            //DateTime dtCgiStart = dtCheck;
+            //DateTime dtCgiPre10m = dtCheck.AddMinutes(-10);
+
+            //取得 目前的CGIDATA 
+            List<CgiStationData> lstTmp = lstData.Where(c => c.DatetimeString == M11DatetimeToString(dtCheck)).ToList<CgiStationData>();
+            if (lstTmp.Count > 0)
+            {
+                sCgiData = lstTmp[0].Value;
+                dtGetDataTime = Utils.getStringToDateTime(lstTmp[0].DatetimeString);
+            }
+                
+
+            //資料處理
+            //補齊沒有資料的時段
+            //計算累積量(與前一個時段相比)
+            //GwRainData
+            List<GwRainData> lstGwRainData = new List<GwRainData>();
+            int idex = 0;
+            //由第一筆開始計算(SQL ASC)
+            DateTime dtStart1 = new DateTime();
+            if (lstData.Count > 0)
+            {
+                dtStart1 = Utils.getStringToDateTime(lstData[0].DatetimeString);
+            }
+
+            
+            GwRainData PreGrd = new GwRainData();
+            for (DateTime i = dtStart1; i <= dtCheck; i = i.AddMinutes(10))
+            {
+                double dTemp = 0;
+                GwRainData grd = new GwRainData();
+                grd.dAccumulation = 0;
+
+                List <CgiStationData> tmpCgiStationDatas = lstData.Where(c => c.DatetimeString == M11DatetimeToString(i)).ToList<CgiStationData>();
+                if (tmpCgiStationDatas.Count == 0)
+                {
+                    //如果沒資料，則抓上次的雨量資料，但是，不計算累積量
+                    grd.DatetimeString = M11DatetimeToString(i);
+                    grd.dtDatetime = i;                    
+                    grd.dRAIN = PreGrd.dRAIN;
+                    grd.dAccumulation = 0;
+                }
+                else
+                {
+                    if (idex == 0) //第一筆特殊處理
+                    {
+                        grd.dAccumulation = 0;
+                        grd.DatetimeString = M11DatetimeToString(i);
+                        grd.dtDatetime = i;
+                        double.TryParse(tmpCgiStationDatas[0].Value, out dTemp);                        
+                        grd.dRAIN = dTemp;
+                        lstGwRainData.Add(grd);
+
+                        PreGrd = grd;
+                        idex++;
+                        continue;
+                    }
+
+                    grd.DatetimeString = M11DatetimeToString(i);
+                    grd.dtDatetime = i;
+                    double.TryParse(tmpCgiStationDatas[0].Value, out dTemp);
+                    grd.dRAIN = dTemp;
+                    //與前一筆比較，計算累積量(跨天計數會歸0，可能造成負數)
+                    if ((grd.dRAIN - PreGrd.dRAIN) > 0)
+                    {
+                        grd.dAccumulation = grd.dRAIN - PreGrd.dRAIN;
+                    }
+                    
+                }
+
+                lstGwRainData.Add(grd);
+                PreGrd = grd;
+
+                idex++;
+            }
+
+            
+            string sRain10m = "0";
+            string sRain1h = "0";
+            string sRain3h = "0";
+            string sRain6h = "0";
+            string sRain12h = "0";
+            string sRain24h = "0";
+            string sRain48h = "0";
+            string sRain72h = "0";
+            double dRain10m = 0;
+            double dRain1h = 0;
+            double dRain3h = 0;
+            double dRain6h = 0;
+            double dRain12h = 0;
+            double dRain24h = 0;
+            double dRain48h = 0;
+            double dRain72h = 0;
+
+            //計數值的單位(累積)
+            //double dValueUnit = 5;
+            // 20210420 計數單位5改為0.5
+            double dValueUnit = 0.5;
+
+            //新計算方式，要跟前面的資料比對，才知道有沒有累積
+
+            //10m - 直接取得累積量直接帶入
+            GwRainData tmpGwRainData = lstGwRainData.Where(c => c.DatetimeString == M11DatetimeToString(dtCheck)).FirstOrDefault();
+            if (tmpGwRainData != null)
+            {
+                dRain10m = lstGwRainData.Where(c => c.DatetimeString == M11DatetimeToString(dtCheck)).FirstOrDefault().dAccumulation;
+                dRain10m = dRain10m * dValueUnit;
+            }
+            
+
+            //1h
+            DateTime dtPreTemp = dtCheck.AddHours(-1);
+            dRain1h = lstGwRainData.Where(c => c.dtDatetime >= dtPreTemp && c.dtDatetime <= dtCheck).Sum(x => x.dAccumulation);
+            dRain1h = dRain1h * dValueUnit;
+
+            //3h
+            dtPreTemp = dtCheck.AddHours(-3);
+            dRain3h = lstGwRainData.Where(c => c.dtDatetime >= dtPreTemp && c.dtDatetime <= dtCheck).Sum(x => x.dAccumulation);
+            dRain3h = dRain3h * dValueUnit;
+
+            //6h
+            dtPreTemp = dtCheck.AddHours(-6);
+            dRain6h = lstGwRainData.Where(c => c.dtDatetime >= dtPreTemp && c.dtDatetime <= dtCheck).Sum(x => x.dAccumulation);
+            dRain6h = dRain6h * dValueUnit;
+
+            //12h
+            dtPreTemp = dtCheck.AddHours(-12);
+            dRain12h = lstGwRainData.Where(c => c.dtDatetime >= dtPreTemp && c.dtDatetime <= dtCheck).Sum(x => x.dAccumulation);
+            dRain12h = dRain12h * dValueUnit;
+
+            //24h
+            dtPreTemp = dtCheck.AddHours(-24);
+            dRain24h = lstGwRainData.Where(c => c.dtDatetime >= dtPreTemp && c.dtDatetime <= dtCheck).Sum(x => x.dAccumulation);
+            dRain24h = dRain24h * dValueUnit;
+
+            //48h
+            dtPreTemp = dtCheck.AddHours(-48);
+            dRain48h = lstGwRainData.Where(c => c.dtDatetime >= dtPreTemp && c.dtDatetime <= dtCheck).Sum(x => x.dAccumulation);
+            dRain48h = dRain48h * dValueUnit;
+
+            //72h
+            dtPreTemp = dtCheck.AddHours(-72);
+            dRain72h = lstGwRainData.Where(c => c.dtDatetime >= dtPreTemp && c.dtDatetime <= dtCheck).Sum(x => x.dAccumulation);
+            dRain72h = dRain72h * dValueUnit;
 
             //四捨五入小數點1位
             dRain10m = Math.Round(dRain10m, 1);
@@ -573,6 +778,62 @@ namespace M11XML
         }
 
         /// <summary>
+        /// 取得水位資料結果(GW)
+        /// </summary>
+        /// <param name="StationName">站名</param>
+        /// <param name="SensorName">儀器名稱</param>
+        /// <param name="dtCheck">比對時間點</param>
+        /// <returns></returns>
+        private string getObservationWellFromDB(BasStationSensor SensorRow, DateTime dtCheck, ref DateTime dtGetDataTime, ref string sCgiData)
+        {
+            string sResult = "";
+            string StationName = SensorRow.Station;
+            string SensorName = SensorRow.Sensor;
+            
+            //預設為0
+            string sWater = "0";
+            //[WATER]
+            ssql = @"
+                    select * from CgiStationData where Station = '{0}' and datatype = 'WATER' and DatetimeString = '{1}'
+                    ";
+            ssql = string.Format(ssql, StationName , M11DatetimeToString(dtCheck));
+            List<CgiStationData> lstData = dbDapper.Query<CgiStationData>(ssql);
+
+            if (lstData.Count() > 0)
+            {
+                sWater = lstData[0].Value;
+                sCgiData = lstData[0].Value;
+                //紀錄資料時間
+                dtGetDataTime = Utils.getStringToDateTime(lstData[0].DatetimeString);
+            }
+
+            //水位高(m)	相對水位高(m)
+            //相對水位高 = 水位高 - 常時水位
+            double dWater = 0;
+            double dDefaultWater = 0;
+            double dRelativeWater = 0;
+            double.TryParse(sWater, out dWater);
+            double.TryParse(SensorRow.DefaultWater, out dDefaultWater);
+            dRelativeWater = dWater - dDefaultWater;
+
+            //四捨五入小數點2位
+            dWater = Math.Round(dWater, 2);
+            dRelativeWater = Math.Round(dRelativeWater, 2);
+
+            //儀器異常，則不顯示數值
+            if (SensorRow.DefaultWater == "-999")
+            {
+                dWater = 0;
+                dRelativeWater = 0;
+            }
+
+            sResult = string.Format("{0} {1}", dWater.ToString(), dRelativeWater.ToString());
+
+            return sResult;
+        }
+
+
+        /// <summary>
         /// 取得水位資料結果(PM)
         /// </summary>
         /// <param name="StationName">站名</param>
@@ -605,6 +866,61 @@ namespace M11XML
 
                 //紀錄資料時間
                 dtGetDataTime = Utils.getStringToDateTime(dr10m[0][CgiConst.DATETIME].ToString());
+            }
+
+            //水位高(m)	相對水位高(m)
+            //相對水位高 = 水位高 - 常時水位
+            double dWater = 0;
+            double dDefaultWater = 0;
+            double dRelativeWater = 0;
+            double.TryParse(sWater, out dWater);
+            double.TryParse(SensorRow.DefaultWater, out dDefaultWater);
+            dRelativeWater = dWater - dDefaultWater;
+
+            //四捨五入小數點2位            
+            dWater = Math.Round(dWater, 2);
+            dRelativeWater = Math.Round(dRelativeWater, 2);
+
+            //儀器異常，則不顯示數值
+            if (SensorRow.DefaultWater == "-999")
+            {
+                dWater = 0;
+                dRelativeWater = 0;
+            }
+
+            sResult = string.Format("{0} {1}", dWater.ToString(), dRelativeWater.ToString());
+
+            return sResult;
+        }
+
+        /// <summary>
+        /// 取得水位資料結果(PM)
+        /// </summary>
+        /// <param name="StationName">站名</param>
+        /// <param name="SensorName">儀器名稱</param>
+        /// <param name="dtCheck">比對時間點</param>
+        /// <returns></returns>
+        private string getPiezoMeterFromDB(BasStationSensor SensorRow, DateTime dtCheck, ref DateTime dtGetDataTime, ref string sCgiData)
+        {
+            string sResult = "";
+            string StationName = SensorRow.Station;
+            string SensorName = SensorRow.Sensor;
+
+            //預設為0
+            string sWater = "0";
+            //[WATER]
+            ssql = @"
+                    select * from CgiStationData where Station = '{0}' and datatype = 'WATER' and DatetimeString = '{1}'
+                    ";
+            ssql = string.Format(ssql, StationName, M11DatetimeToString(dtCheck));
+            List<CgiStationData> lstData = dbDapper.Query<CgiStationData>(ssql);
+
+            if (lstData.Count() > 0)
+            {
+                sWater = lstData[0].Value;
+                sCgiData = lstData[0].Value;
+                //紀錄資料時間
+                dtGetDataTime = Utils.getStringToDateTime(lstData[0].DatetimeString);
             }
 
             //水位高(m)	相對水位高(m)
@@ -768,6 +1084,113 @@ namespace M11XML
         }
 
         /// <summary>
+        /// 取得水位資料結果(TM)
+        /// </summary>
+        /// <param name="StationName">站名</param>
+        /// <param name="SensorName">儀器名稱</param>
+        /// <param name="dtCheck">比對時間點</param>
+        /// <returns></returns>
+        private string getBiTiltMeterFromDB(BasStationSensor SensorRow, DateTime dtCheck, ref DateTime dtGetDataTime, ref string sCgiData)
+        {
+            string sResult = "";
+            string StationName = SensorRow.Station;
+            string SensorName = SensorRow.Sensor;
+
+            string sSX = "0";
+            string sSY = "0";
+
+            //[SX SY]
+            ssql = @"
+                    select * from CgiStationData where Station = '{0}' and DatetimeString = '{1}' and datatype in ('{2}','{3}') 
+                    ";
+            ssql = string.Format(ssql, StationName, M11DatetimeToString(dtCheck), CgiConst.SX, CgiConst.SY);
+            List<CgiStationData> lstData = dbDapper.Query<CgiStationData>(ssql);
+
+            if (lstData.Count() > 0)
+            {
+                if (lstData.Where(c => c.DataType == CgiConst.SX).Count() > 0)
+                {
+                    CgiStationData dataSX = lstData.Where(c => c.DataType == CgiConst.SX).ToList()[0];
+                    sSX = dataSX.Value;
+                }
+                
+                if (lstData.Where(c => c.DataType == CgiConst.SY).Count() > 0)
+                {
+                    CgiStationData dataSY = lstData.Where(c => c.DataType == CgiConst.SY).ToList()[0];
+                    sSY= dataSY.Value;
+                }
+                
+                sCgiData = string.Format("{0} {1}", sSX, sSY);
+                //紀錄資料時間
+                dtGetDataTime = Utils.getStringToDateTime(lstData[0].DatetimeString);
+            }
+           
+            //20210413 改抓已經產的XML資料，避免沒有資料產生時，資料會有異常
+            //抓昨天的資料
+            DateTime dtBefore1D = dtCheck.AddDays(-1);
+            string sD_before = "0";
+            string sE_before = "0";
+
+            ssql = @"
+                        select * from Result10MinData
+                        where StationID = '{0}' and SensorID = '{1}' and DatetimeString = '{2}'
+                    ";
+            ssql = string.Format(ssql, StationName, SensorName, M11DatetimeToString(dtBefore1D));
+
+            Result10MinData qRd = dbDapper.QuerySingleOrDefault<Result10MinData>(ssql);
+
+            if (qRd != null)
+            {
+                string[] values = qRd.value.Split(' ');
+                if (values.Length == 6)
+                {
+                    sD_before = values[0];
+                    sE_before = values[1];
+                }
+            }
+
+            //D方位一觀測值(秒)	E方位二觀測值(秒)	F方位一累積變位量(秒)	G方位二累積變位量(秒)	H方位一速率(秒/天)	I方位二速率(秒/天)
+            //D=SX*3600	        E=SY*3600	    F=D-初始值(0)	        G=E-初始值(0)	        H=今天D-昨天D	    I=今天E-昨天E
+
+            double dSX = 0;
+            double dSY = 0;
+            double dD = 0;
+            double dE = 0;
+            double dF = 0;
+            double dG = 0;
+            double dH = 0;
+            double dI = 0;
+
+            //一天前的資料
+            double dD_before = 0;
+            double dE_before = 0;
+
+            double.TryParse(sSX, out dSX);
+            double.TryParse(sSY, out dSY);
+            double.TryParse(sD_before, out dD_before);
+            double.TryParse(sE_before, out dE_before);
+            dD = dSX * 3600;
+            dE = dSY * 3600;
+            dF = dD - 0;
+            dG = dE - 0;
+            dH = dD - dD_before;
+            dI = dE - dE_before;
+
+            //四捨五入整數位
+            dD = Math.Round(dD, 0);
+            dE = Math.Round(dE, 0);
+            dF = Math.Round(dF, 0);
+            dG = Math.Round(dG, 0);
+            dH = Math.Round(dH, 0);
+            dI = Math.Round(dI, 0);
+
+            sResult = string.Format("{0} {1} {2} {3} {4} {5}", dD.ToString(), dE.ToString()
+                , dF.ToString(), dG.ToString(), dH.ToString(), dI.ToString());
+
+            return sResult;
+        }
+
+        /// <summary>
         /// 取得水位資料結果(TM2)
         /// </summary>
         /// <param name="StationName">站名</param>
@@ -864,6 +1287,115 @@ namespace M11XML
             dH = Math.Round(dH, 0);
             dI = Math.Round(dI, 0);
 
+
+            sResult = string.Format("{0} {1} {2} {3} {4} {5}", dD.ToString(), dE.ToString()
+                , dF.ToString(), dG.ToString(), dH.ToString(), dI.ToString());
+
+            return sResult;
+        }
+
+        /// <summary>
+        /// 取得水位資料結果(TM2)
+        /// </summary>
+        /// <param name="StationName">站名</param>
+        /// <param name="SensorName">儀器名稱</param>
+        /// <param name="dtCheck">比對時間點</param>
+        /// <returns></returns>
+        private string getBiTiltMeter2FromDB(BasStationSensor SensorRow, DateTime dtCheck, ref DateTime dtGetDataTime, ref string sCgiData)
+        {
+            string sResult = "";
+            string StationName = SensorRow.Station;
+            string SensorName = SensorRow.Sensor;
+
+            string sSX = "0";
+            string sSY = "0";
+
+            //[SX SY]
+            ssql = @"
+                    select * from CgiStationData where Station = '{0}' and DatetimeString = '{1}' and datatype in ('{2}','{3}') 
+                    ";
+            ssql = string.Format(ssql, StationName, M11DatetimeToString(dtCheck), CgiConst.S2X, CgiConst.S2Y);
+            List<CgiStationData> lstData = dbDapper.Query<CgiStationData>(ssql);
+
+            if (lstData.Count() > 0)
+            {
+                if (lstData.Where(c => c.DataType == CgiConst.S2X).Count() > 0)
+                {
+                    CgiStationData dataS2X = lstData.Where(c => c.DataType == CgiConst.S2X).ToList()[0];
+                    sSX = dataS2X.Value;
+                }
+
+                if (lstData.Where(c => c.DataType == CgiConst.S2Y).Count() > 0)
+                {
+                    CgiStationData dataS2Y = lstData.Where(c => c.DataType == CgiConst.S2Y).ToList()[0];
+                    sSY = dataS2Y.Value;
+                }
+
+                sCgiData = string.Format("{0} {1}", sSX, sSY);
+                //紀錄資料時間
+                dtGetDataTime = Utils.getStringToDateTime(lstData[0].DatetimeString);
+            }
+
+            //20210413 改抓已經產的XML資料，避免沒有資料產生時，資料會有異常
+            //抓昨天的資料
+            DateTime dtBefore1D = dtCheck.AddDays(-1);
+            string sD_before = "0";
+            string sE_before = "0";
+
+            ssql = @"
+                        select * from Result10MinData
+                        where StationID = '{0}' and SensorID = '{1}' and DatetimeString = '{2}'
+                    ";
+            ssql = string.Format(ssql, StationName, SensorName, M11DatetimeToString(dtBefore1D));
+
+            Result10MinData qRd = dbDapper.QuerySingleOrDefault<Result10MinData>(ssql);
+
+            if (qRd != null)
+            {
+                string[] values = qRd.value.Split(' ');
+                if (values.Length == 6)
+                {
+                    sD_before = values[0];
+                    sE_before = values[1];
+                }
+            }
+
+            //D方位一觀測值(秒)	E方位二觀測值(秒)	F方位一累積變位量(秒)	G方位二累積變位量(秒)	H方位一速率(秒/天)	I方位二速率(秒/天)
+            //D=SX*3600	        E=SY*3600	    F=D-初始值(0)	    G=E-初始值(0)	    H=今天D-昨天D	    I=今天E-昨天E
+
+            double dSX = 0;
+            double dSY = 0;
+            double dD = 0;
+            double dE = 0;
+            double dF = 0;
+            double dG = 0;
+            double dH = 0;
+            double dI = 0;
+
+            //一天前的資料
+            //double dSX_before = 0;
+            //double dSY_before = 0;
+            double dD_before = 0;
+            double dE_before = 0;
+
+            double.TryParse(sSX, out dSX);
+            double.TryParse(sSY, out dSY);
+            double.TryParse(sD_before, out dD_before);
+            double.TryParse(sE_before, out dE_before);
+            dD = dSX * 3600;
+            dE = dSY * 3600;
+            dF = dD - 0;
+            dG = dE - 0;
+            dH = dD - dD_before;
+            dI = dE - dE_before;
+
+            //四捨五入整數位
+            dD = Math.Round(dD, 0);
+            dE = Math.Round(dE, 0);
+            dF = Math.Round(dF, 0);
+            dG = Math.Round(dG, 0);
+            dH = Math.Round(dH, 0);
+            dI = Math.Round(dI, 0);
 
             sResult = string.Format("{0} {1} {2} {3} {4} {5}", dD.ToString(), dE.ToString()
                 , dF.ToString(), dG.ToString(), dH.ToString(), dI.ToString());
@@ -981,24 +1513,62 @@ namespace M11XML
                                     sensor.InnerText = svalue;
                                     station.AppendChild(sensor);
 
-                                    //將每次結果寫入資料庫
-                                    Result10MinData RD = new Result10MinData();
-                                    RD.SiteID = SiteName;
-                                    RD.StationID = StationName;
-                                    RD.SensorID = SensorName;
-                                    RD.DataType = getSensor_Type(SensorName);
-                                    RD.DataName = getSensor_Type(SensorName);
-                                    RD.Datetime = dtCheck;
-                                    RD.DatetimeString = dtCheck.ToString("yyyy-MM-dd HH:mm:00");
-                                    RD.GetTime = sGetTime;
-                                    RD.observation_num = sobservation_num;
-                                    RD.sensor_status = ssensor_status;
-                                    RD.value = svalue;
-                                    RD.remark = sRemark;
-                                    RD.CgiData = sCgiData;
 
-                                    dbDapper.Insert<Result10MinData>(RD);
+                                    //判斷是否有資料存在，沒資料新增，有資料更新
+                                    ssql = @"
+                                            select * from Result10MinData
+                                            where StationID = '{0}' and SensorID = '{1}' and DatetimeString = '{2}'
+                                        ";
+                                    ssql = string.Format(ssql, StationName, SensorName, dtCheck.ToString("yyyy-MM-dd HH:mm:00"));
+                                    List<Result10MinData> lstcheck = dbDapper.Query<Result10MinData>(ssql);
 
+                                    //如果出現多筆，則先刪除後再新增
+                                    if (lstcheck.Count > 1)
+                                    {
+                                        foreach (Result10MinData item in lstcheck)
+                                        {
+                                            dbDapper.Delete<Result10MinData>(item);
+                                        }
+                                    }
+                                    
+                                    Result10MinData RD = dbDapper.QuerySingleOrDefault<Result10MinData>(ssql);
+                                    if (RD == null)
+                                    {
+                                        //將每次結果寫入資料庫
+                                        RD = new Result10MinData();
+                                        RD.SiteID = SiteName;
+                                        RD.StationID = StationName;
+                                        RD.SensorID = SensorName;
+                                        RD.DataType = getSensor_Type(SensorName);
+                                        RD.DataName = getSensor_Type(SensorName);
+                                        RD.Datetime = dtCheck;
+                                        RD.DatetimeString = dtCheck.ToString("yyyy-MM-dd HH:mm:00");
+                                        RD.GetTime = sGetTime;
+                                        RD.observation_num = sobservation_num;
+                                        RD.sensor_status = ssensor_status;
+                                        RD.value = svalue;
+                                        RD.remark = sRemark;
+                                        RD.CgiData = sCgiData;
+
+                                        dbDapper.Insert<Result10MinData>(RD);
+                                    }
+                                    else
+                                    {
+                                        RD.SiteID = SiteName;
+                                        RD.StationID = StationName;
+                                        RD.SensorID = SensorName;
+                                        RD.DataType = getSensor_Type(SensorName);
+                                        RD.DataName = getSensor_Type(SensorName);
+                                        RD.Datetime = dtCheck;
+                                        RD.DatetimeString = dtCheck.ToString("yyyy-MM-dd HH:mm:00");
+                                        RD.GetTime = sGetTime;
+                                        RD.observation_num = sobservation_num;
+                                        RD.sensor_status = ssensor_status;
+                                        RD.value = svalue;
+                                        RD.remark = sRemark;
+                                        RD.CgiData = sCgiData;
+                                        dbDapper.Update<Result10MinData>(RD);
+                                    }
                                 }
 
                                 site_data.AppendChild(station);
@@ -1045,7 +1615,7 @@ namespace M11XML
             {
 
 #if DEBUG
-                //dtCheck = new DateTime(2021, 4, 13, 17, 30, 8);
+                //dtCheck = new DateTime(2021, 4, 29, 10, 00, 8);
 #endif
 
                 //預計排程每分鐘執行一次，排除非剛好10分鐘的執行(00,10,20,30,40,50)
@@ -1103,8 +1673,13 @@ namespace M11XML
                             {
                                 double.TryParse(rmd.CgiData, out dRainfall);
                             }
-                            dRainfall = dRainfall * 5;
+                            dRainfall = dRainfall * 0.5;
 
+                            // 20210426 雨量站維護期間，使用網頁設定不啟用。並將雨量值改變-98表示維護中。
+                            if (item.Active_YN == "N")
+                            {
+                                dRainfall = -98;
+                            }
 
                             //row
                             var row = doc.CreateElement("row");
@@ -1146,7 +1721,7 @@ namespace M11XML
                         doc.Save(Path.Combine(M11Const.Path_XmlResultWeb, "PrecipitationToday.xml"));
 
                         //儲存到網頁發布路徑-7天歷史資料區
-                        //doc.Save(Path.Combine(M11Const.Path_XmlResultWeb7Day, string.Format("{0}_{1}", dtCheck.ToString("yyyyMMddHHmm"), "10min_a_ds_data.xml")));
+                        doc.Save(Path.Combine(M11Const.Path_PrecipitationWeb7Day, string.Format("{0}_{1}", dtCheck.ToString("yyyyMMddHHmm"), "PrecipitationToday.xml")));
 
                         //儲存到準備FTP上傳路徑
                         doc.Save(Path.Combine(M11Const.Path_FTPQueueXmlResult, string.Format("{0}_{1}", dtCheck.ToString("yyyyMMddHHmm"), "PrecipitationToday.xml")));
@@ -1526,12 +2101,17 @@ namespace M11XML
 
 
         /// <summary>
-        /// 讀取原始資料轉檔到XML資料庫
+        /// 讀取原始資料轉檔到XML資料庫與DB資料庫
         /// </summary>
         private void ReadDataToXMLDB()
         {
             try
             {
+                //現在的時間預先補上個時段的資料到下一個時段的資料
+                ProcPreGetNextDataFromPreData();
+
+                //==========================================================================================================================
+
                 int iIndex = 1;
 
                 string[] aFiles = Directory.GetFiles(M11Const.Path_Original);
@@ -1540,7 +2120,7 @@ namespace M11XML
                 {
                     ShowMessageToFront(string.Format("[{0}/{1}]讀取原始資料轉檔到XML資料庫=={2}", iIndex.ToString(), aFiles.Length, fname));
                     //轉檔到XML
-                    TransToXML(fname);
+                    //TransToXML(fname);
 
                     //轉檔Cgi資料到資料庫中
                     TransCgiDataToDB(fname);
@@ -1734,6 +2314,7 @@ namespace M11XML
                             //更新資料
                             CgiStationData tmpData = tmp[0];
                             tmpData.Value = sr.RealVale.ToString();
+                            tmpData.Status = "Y";
                             dbDapper.Update<CgiStationData>(tmpData);
                         }
                         else
@@ -1746,6 +2327,7 @@ namespace M11XML
                             tmpData.Station = StationName;
                             tmpData.DataType = sDataType.ToUpper();
                             tmpData.Value = sr.RealVale.ToString();
+                            tmpData.Status = "Y";
                             dbDapper.Insert<CgiStationData>(tmpData);
                         }
                     }
@@ -1890,6 +2472,13 @@ namespace M11XML
 
                 string sValue = di[key] == "None" ? "" : di[key];
 
+                //RAIN雨量特殊處理，跨天記數歸0
+                //判斷00:00:00
+                if (dt.Hour == 0 && dt.Minute == 0 && key.ToUpper() == "RAIN")
+                {
+                    sValue = "0";
+                }
+
                 //判斷資料是否存在
                 List<CgiStationData> tmp = lstData.Where(c => c.DataType == key.ToUpper()).ToList();
 
@@ -1899,6 +2488,7 @@ namespace M11XML
                     //更新資料
                     CgiStationData tmpData = tmp[0];
                     tmpData.Value = sValue;
+                    tmpData.Status = "Y";
                     dbDapper.Update<CgiStationData>(tmpData);
                 }
                 else
@@ -1911,7 +2501,54 @@ namespace M11XML
                     tmpData.Station = sStation;
                     tmpData.DataType = key.ToUpper();
                     tmpData.Value = sValue;
+                    tmpData.Status = "Y";
                     dbDapper.Insert<CgiStationData>(tmpData);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 現在的時間預先補上個時段的資料到下一個時段的資料
+        /// </summary>
+        /// <param name="fname"></param>
+        private void ProcPreGetNextDataFromPreData()
+        {
+            //取得現在時間
+            DateTime dt = DateTime.Now;
+
+            //取得下一個時段的時間
+            dt = TransDatetimeToNextFullDatetime(dt);
+
+            //下個時段時間字串
+            string sNextDatetimeString = M11DatetimeToString(dt);
+            //上個時段時間字串
+            string sPreDatetimeString = M11DatetimeToString(dt.AddMinutes(-10));
+
+
+            //取得上個時段資料庫資料
+            ssql = @"
+                    select * from CgiStationData where DatetimeString = '{0}'                                                            
+                    ";
+            ssql = string.Format(ssql, sPreDatetimeString);
+            List<CgiStationData> lstPreData = dbDapper.Query<CgiStationData>(ssql);
+
+            //取得下個時段資料庫資料
+            ssql = @"
+                    select * from CgiStationData where DatetimeString = '{0}'                                                            
+                    ";
+            ssql = string.Format(ssql, sNextDatetimeString);
+            List<CgiStationData> lstNextData = dbDapper.Query<CgiStationData>(ssql);
+
+            foreach (CgiStationData item in lstPreData)
+            {
+                //判斷下個時段資料是否存在
+                if (lstNextData.Where(c => c.Station == item.Station && c.DataType == item.DataType).Count() == 0)
+                {
+                    //資料不存在，則新增一筆資料
+                    item.DatetimeString = sNextDatetimeString;
+                    item.Status = "N"; //預設先註記非即時資料
+
+                    dbDapper.Insert<CgiStationData>(item);
                 }
             }
         }
@@ -1947,6 +2584,16 @@ namespace M11XML
         }
 
         
+    }
+
+
+    public class GwRainData 
+    {
+        public string DatetimeString = "";
+        public DateTime dtDatetime ;
+        public double dRAIN = 0;
+        //累積量(與前一個時段相比)
+        public double dAccumulation = 0;
     }
 
 
