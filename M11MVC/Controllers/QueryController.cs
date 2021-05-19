@@ -84,7 +84,14 @@ namespace M11MVC.Controllers
 
             List<string> lstSensor = new List<string>();
             if (RG == "Y") lstSensor.Add("RG");
-            if (TM == "Y") lstSensor.Add("TM");
+            if (TM == "Y") 
+            {
+                lstSensor.Add("TM");
+                //DS011_01該站特殊TM有兩個
+                lstSensor.Add("TM1");
+                lstSensor.Add("TM2");
+            }
+            
             if (PM == "Y") lstSensor.Add("PM");
             if (GW == "Y") lstSensor.Add("GW");
 
@@ -119,10 +126,6 @@ namespace M11MVC.Controllers
         [HttpGet]
         public ActionResult DownRainStatistics(string Params)
         {
-
-            
-
-
             MVCControlClass.ApiResult aResult = new MVCControlClass.ApiResult();
 
             dynamic dParams = JsonConvert.DeserializeObject<dynamic>(Params);
@@ -140,7 +143,14 @@ namespace M11MVC.Controllers
 
             List<string> lstSensor = new List<string>();
             if (RG == "Y") lstSensor.Add("RG");
-            if (TM == "Y") lstSensor.Add("TM");
+            if (TM == "Y") 
+            {
+                lstSensor.Add("TM");
+                //DS011_01該站特殊TM有兩個
+                lstSensor.Add("TM1");
+                lstSensor.Add("TM2");
+            }
+            
             if (PM == "Y") lstSensor.Add("PM");
             if (GW == "Y") lstSensor.Add("GW");
 
@@ -151,12 +161,16 @@ namespace M11MVC.Controllers
 
             // 20200429 只顯示小時數據
             ssql = @"
-                select distinct a.SiteID, a.StationID,a.DatetimeString,b.datavalue ,RG.value RGvalue,TM.value TMvalue,PM.value PMvalue,GW.value GWvalue  from Result10MinData a 
+                select distinct a.SiteID, a.StationID,a.DatetimeString,b.datavalue 
+                ,RG.value RGvalue,TM.value TMvalue,PM.value PMvalue,GW.value GWvalue,TM1.value TM1value,TM2.value TM2value  
+                from Result10MinData a 
 			    left join BasM11Setting b on a.siteid = b.dataitem and b.datatype = 'SiteCName'
                 left join Result10MinData RG on a.StationID = RG.StationID and RG.SensorID = 'RG' and a.DatetimeString = RG.DatetimeString
                 left join Result10MinData TM on a.StationID = TM.StationID and TM.SensorID = 'TM' and a.DatetimeString = TM.DatetimeString
                 left join Result10MinData PM on a.StationID = PM.StationID and PM.SensorID = 'PM' and a.DatetimeString = PM.DatetimeString
                 left join Result10MinData GW on a.StationID = GW.StationID and GW.SensorID = 'GW' and a.DatetimeString = GW.DatetimeString
+                left join Result10MinData TM1 on a.StationID = TM1.StationID and TM1.SensorID = 'TM1' and a.DatetimeString = TM1.DatetimeString
+                left join Result10MinData TM2 on a.StationID = TM2.StationID and TM2.SensorID = 'TM2' and a.DatetimeString = TM2.DatetimeString
                 where a.StationID = '{0}'                 
                 and a.DatetimeString between '{2}' and '{3}'                 
             ";
@@ -198,6 +212,20 @@ namespace M11MVC.Controllers
             //GW
             head.Add("[GW]水位高(m)");
             head.Add("[GW]相對水位高(m)");
+            //TM1
+            head.Add("[TM1]方位一觀測值(秒)");
+            head.Add("[TM1]方位二觀測值(秒)");
+            head.Add("[TM1]方位一累積變位量(秒)");
+            head.Add("[TM1]方位二累積變位量(秒)");
+            head.Add("[TM1]方位一速率(秒/天)");
+            head.Add("[TM1]方位二速率(秒/天)");
+            //TM2
+            head.Add("[TM2]方位一觀測值(秒)");
+            head.Add("[TM2]方位二觀測值(秒)");
+            head.Add("[TM2]方位一累積變位量(秒)");
+            head.Add("[TM2]方位二累積變位量(秒)");
+            head.Add("[TM2]方位一速率(秒/天)");
+            head.Add("[TM2]方位二速率(秒/天)");
 
             //Func<string,string,List<string>> SensorValuePaser
 
@@ -282,6 +310,44 @@ namespace M11MVC.Controllers
                 if (item.GWvalue != null)
                 {
                     string[] aValue = item.GWvalue.Split(' ');
+                    for (int i = 0; i < aValue.Length; i++)
+                    {
+                        lstTmp[i] = aValue[i];
+                    }
+                }
+                foreach (string value in lstTmp)
+                {
+                    cols.Add(value);
+                }
+
+                //[TM1]數據拆開各自一個欄位
+                lstTmp.Clear();
+                for (int i = 0; i < 6; i++)
+                {
+                    lstTmp.Add("");
+                }
+                if (item.TM1value != null)
+                {
+                    string[] aValue = item.TM1value.Split(' ');
+                    for (int i = 0; i < aValue.Length; i++)
+                    {
+                        lstTmp[i] = aValue[i];
+                    }
+                }
+                foreach (string value in lstTmp)
+                {
+                    cols.Add(value);
+                }
+
+                //[TM2]數據拆開各自一個欄位
+                lstTmp.Clear();
+                for (int i = 0; i < 6; i++)
+                {
+                    lstTmp.Add("");
+                }
+                if (item.TM2value != null)
+                {
+                    string[] aValue = item.TM2value.Split(' ');
                     for (int i = 0; i < aValue.Length; i++)
                     {
                         lstTmp[i] = aValue[i];
