@@ -21,6 +21,9 @@ namespace M11System
         public static string Path_CcdResultHist = @"D:\M11\Data\CcdResultHist";        
         public static string Path_DBSimulation = @"D:\M11\DBSimulation";
 
+        //備份相關
+        public static string Path_BackupCGIData = @"D:\M11\Data\20-BackupData\CGIData";
+
         public static string Path_XmlResultWeb = @"D:\M11\M11Web\dsmon\am";
         public static string Path_XmlResultWeb7Day = @"D:\M11\M11Web\dsmon\amhist";
         public static string Path_PrecipitationWeb7Day = @"D:\M11\M11Web\dsmon\pmhist";
