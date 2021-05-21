@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M11MVC", "M11MVC\M11MVC.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M11CCD", "M11CCD\M11CCD.csproj", "{02F4840D-3E8F-4E43-AC0B-D560AB5BA11A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M11Google", "M11Google\M11Google.csproj", "{75B8F9A1-38B5-4164-B352-A748534582BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{02F4840D-3E8F-4E43-AC0B-D560AB5BA11A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02F4840D-3E8F-4E43-AC0B-D560AB5BA11A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02F4840D-3E8F-4E43-AC0B-D560AB5BA11A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75B8F9A1-38B5-4164-B352-A748534582BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75B8F9A1-38B5-4164-B352-A748534582BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75B8F9A1-38B5-4164-B352-A748534582BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75B8F9A1-38B5-4164-B352-A748534582BF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
