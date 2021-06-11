@@ -658,38 +658,38 @@ namespace M11XML
             }
             
 
-            //1h
-            DateTime dtPreTemp = dtCheck.AddHours(-1);
+            //1h(一小時內，所以當筆往前取5筆,所以排除一小時前的時刻=>0940,0950,1000,1010,1020,1030)
+            DateTime dtPreTemp = dtCheck.AddHours(-1).AddMinutes(10);
             dRain1h = lstGwRainData.Where(c => c.dtDatetime >= dtPreTemp && c.dtDatetime <= dtCheck).Sum(x => x.dAccumulation);
             dRain1h = dRain1h * dValueUnit;
 
             //3h
-            dtPreTemp = dtCheck.AddHours(-3);
+            dtPreTemp = dtCheck.AddHours(-3).AddMinutes(10);
             dRain3h = lstGwRainData.Where(c => c.dtDatetime >= dtPreTemp && c.dtDatetime <= dtCheck).Sum(x => x.dAccumulation);
             dRain3h = dRain3h * dValueUnit;
 
             //6h
-            dtPreTemp = dtCheck.AddHours(-6);
+            dtPreTemp = dtCheck.AddHours(-6).AddMinutes(10);
             dRain6h = lstGwRainData.Where(c => c.dtDatetime >= dtPreTemp && c.dtDatetime <= dtCheck).Sum(x => x.dAccumulation);
             dRain6h = dRain6h * dValueUnit;
 
             //12h
-            dtPreTemp = dtCheck.AddHours(-12);
+            dtPreTemp = dtCheck.AddHours(-12).AddMinutes(10);
             dRain12h = lstGwRainData.Where(c => c.dtDatetime >= dtPreTemp && c.dtDatetime <= dtCheck).Sum(x => x.dAccumulation);
             dRain12h = dRain12h * dValueUnit;
 
             //24h
-            dtPreTemp = dtCheck.AddHours(-24);
+            dtPreTemp = dtCheck.AddHours(-24).AddMinutes(10);
             dRain24h = lstGwRainData.Where(c => c.dtDatetime >= dtPreTemp && c.dtDatetime <= dtCheck).Sum(x => x.dAccumulation);
             dRain24h = dRain24h * dValueUnit;
 
             //48h
-            dtPreTemp = dtCheck.AddHours(-48);
+            dtPreTemp = dtCheck.AddHours(-48).AddMinutes(10);
             dRain48h = lstGwRainData.Where(c => c.dtDatetime >= dtPreTemp && c.dtDatetime <= dtCheck).Sum(x => x.dAccumulation);
             dRain48h = dRain48h * dValueUnit;
 
             //72h
-            dtPreTemp = dtCheck.AddHours(-72);
+            dtPreTemp = dtCheck.AddHours(-72).AddMinutes(10);
             dRain72h = lstGwRainData.Where(c => c.dtDatetime >= dtPreTemp && c.dtDatetime <= dtCheck).Sum(x => x.dAccumulation);
             dRain72h = dRain72h * dValueUnit;
 

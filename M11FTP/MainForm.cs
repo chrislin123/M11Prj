@@ -51,7 +51,7 @@ namespace M11FTP
                 
                 //上傳FTP(10分鐘)
                 ProcUploadFTP();
-
+                                
                 ShowMessageToFront("轉檔完畢");
             }
             catch (Exception ex)
@@ -123,7 +123,9 @@ namespace M11FTP
                         iIndex++;
 
                         //存至備份資料夾
-                        fi.CopyTo(Path.Combine(M11Const.Path_FTPQueueTxtOriginalBak, fi.Name), true);
+                        //fi.CopyTo(Path.Combine(M11Const.Path_FTPQueueTxtOriginalBak, fi.Name), true);
+                        // 20210521 直接移動到備份資料夾進行處理
+                        M11Helper.M11BackupCopyToCGIData(fi);
 
                         //刪除已處理資料
                         fi.Delete();

@@ -23,6 +23,9 @@ namespace M11System
 
         //備份相關
         public static string Path_BackupCGIData = @"D:\M11\Data\20-BackupData\CGIData";
+        public static string Path_BackupCGIDataZip = @"D:\M11\Data\20-BackupData\CGIDataZip";
+
+        
 
         public static string Path_XmlResultWeb = @"D:\M11\M11Web\dsmon\am";
         public static string Path_XmlResultWeb7Day = @"D:\M11\M11Web\dsmon\amhist";

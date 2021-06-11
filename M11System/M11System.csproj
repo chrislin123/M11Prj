@@ -51,6 +51,7 @@
     <Compile Include="M11Const.cs" />
     <Compile Include="M11ModelM11.cs" />
     <Compile Include="M11Model.cs" />
+    <Compile Include="M11Helper.cs" />
     <Compile Include="M11Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
