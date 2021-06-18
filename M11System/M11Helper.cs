@@ -9,7 +9,7 @@ namespace M11System
 {
     public class M11Helper
     {
-
+        
 
         /// <summary>
         /// CGI資料移動到備份資料夾(傳入的FileInfo檔案不刪除)

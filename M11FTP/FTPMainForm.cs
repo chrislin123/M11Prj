@@ -16,9 +16,9 @@ using M11System;
 
 namespace M11FTP
 {
-    public partial class MainForm : BaseForm
+    public partial class FTPMainForm : BaseForm
     {
-        public MainForm()
+        public FTPMainForm()
         {
             InitializeComponent();
             base.InitForm();
