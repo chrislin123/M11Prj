@@ -1,6 +1,6 @@
 ﻿namespace M11XML
 {
-    partial class MainForm
+    partial class MainFormXML
     {
         /// <summary>
         /// Required designer variable.

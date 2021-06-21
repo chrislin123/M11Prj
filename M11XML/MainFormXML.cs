@@ -18,9 +18,9 @@ using M11System.Model.M11;
 
 namespace M11XML
 {
-    public partial class MainForm : BaseForm
+    public partial class MainFormXML : BaseForm
     {
-        public MainForm()
+        public MainFormXML()
         {
             InitializeComponent();
             base.InitForm();
@@ -907,7 +907,7 @@ namespace M11XML
             string SensorName = SensorRow.Sensor;
 
             //預設為0
-            string sWater = "0";
+            string sWaterCgi = "0";
             //[WATER]
             ssql = @"
                     select * from CgiStationData where Station = '{0}' and datatype = 'WATER' and DatetimeString = '{1}'
@@ -917,19 +917,23 @@ namespace M11XML
 
             if (lstData.Count() > 0)
             {
-                sWater = lstData[0].Value;
+                sWaterCgi = lstData[0].Value;
                 sCgiData = lstData[0].Value;
                 //紀錄資料時間
                 dtGetDataTime = Utils.getStringToDateTime(lstData[0].DatetimeString);
             }
 
             //水位高(m)	相對水位高(m)
+            // 202106121 新增水位高公式
+            //水位高(m) = -(10-0.1*儀器回傳值)
             //相對水位高 = 水位高 - 常時水位
-            double dWater = 0;
-            double dDefaultWater = 0;
-            double dRelativeWater = 0;
-            double.TryParse(sWater, out dWater);
+            double dWaterCgi = 0;       //儀器回傳值
+            double dWater = 0;          //水位高
+            double dDefaultWater = 0;   //常時水位
+            double dRelativeWater = 0;  //相對水位高
+            double.TryParse(sWaterCgi, out dWaterCgi);
             double.TryParse(SensorRow.DefaultWater, out dDefaultWater);
+            dWater = -1 * (10 - (0.1 * dWaterCgi));
             dRelativeWater = dWater - dDefaultWater;
 
             //四捨五入小數點2位            

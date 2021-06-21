@@ -120,7 +120,7 @@ namespace M11XmlHistory
                 //
                 DateTime dt7Day = new DateTime(dtNow7D.Year, dtNow7D.Month, dtNow7D.Day, 0, 0, 0);
 
-                // 刪除XML資料夾[監測資料]歷史30天以上的資料
+                // 刪除XML資料夾[XML資料夾]歷史30天以上的資料
                 ShowMessageToFront("刪除[XML資料夾]歷史30天以上的資料==開始");
                 foreach (string fname in Directory.GetFiles(M11Const.Path_FTPQueueXmlResult7Day))
                 {
