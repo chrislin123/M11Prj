@@ -1,6 +1,6 @@
 ﻿namespace M11FTP
 {
-    partial class FTPMainForm
+    partial class MainFormFTP
     {
         /// <summary>
         /// Required designer variable.

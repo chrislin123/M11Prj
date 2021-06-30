@@ -16,7 +16,7 @@ namespace M11FTP
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FTPMainForm());
+            Application.Run(new MainFormFTP());
         }
     }
 }

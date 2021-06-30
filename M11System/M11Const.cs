@@ -18,6 +18,7 @@ namespace M11System
         public static string Path_FTPQueueXmlResultBak = @"D:\M11\Data\FTPQueueXmlResultBak";
         public static string Path_FTPQueueXmlResult7Day = @"D:\M11\Data\FTPQueueXmlResult7Day";
         public static string Path_FTPQueueCcdResult = @"D:\M11\Data\FTPQueueCcdResult";
+        public static string Path_FTPQueueGPSData = @"D:\M11\Data\FTPQueueGPSData";
         public static string Path_CcdResultHist = @"D:\M11\Data\CcdResultHist";        
         public static string Path_DBSimulation = @"D:\M11\DBSimulation";
 
@@ -25,13 +26,16 @@ namespace M11System
         public static string Path_BackupCGIData = @"D:\M11\Data\20-BackupData\CGIData";
         public static string Path_BackupCGIDataZip = @"D:\M11\Data\20-BackupData\CGIDataZip";
 
-        
+        //GPS相關
+        public static string Path_ChiisoSource = @"D:\FTP\Data\chiiso";
 
+        //發布網站相關
         public static string Path_XmlResultWeb = @"D:\M11\M11Web\dsmon\am";
         public static string Path_XmlResultWeb7Day = @"D:\M11\M11Web\dsmon\amhist";
         public static string Path_PrecipitationWeb7Day = @"D:\M11\M11Web\dsmon\pmhist";
         public static string Path_CcdResultWeb = @"D:\M11\M11Web\dsmon\vm";
 
+        //CCTV相關
         public static string Path_CcdSource = @"D:\FTP\Data\cctv";
 
         public static string FilePath_SchemaCGIData = Path.Combine(@"D:\M11\DBSimulation", "Schema_CGIData.xml");
@@ -49,7 +53,12 @@ namespace M11System
         public static string FTP_Password = "@@hydjan222!!";
 
         //public static string API_Status
-
+        
+        public static string SensorDataType_RG = "RG";
+        public static string SensorDataType_TM = "TM";
+        public static string SensorDataType_GW = "GW";
+        public static string SensorDataType_PM = "PM";
+        public static string SensorDataType_GPS = "GPS";
 
 
     }

@@ -39,6 +39,7 @@ namespace M11XML
             Directory.CreateDirectory(M11Const.Path_XmlResultWeb7Day);
             Directory.CreateDirectory(M11Const.Path_PrecipitationWeb7Day);
             Directory.CreateDirectory(M11Const.Path_FTPQueueXmlResult7Day);
+            Directory.CreateDirectory(M11Const.Path_FTPQueueGPSData);
 
 
             //DateTime dtCheck = new DateTime(2021, 3, 13, 17, 30, 8);
@@ -46,7 +47,8 @@ namespace M11XML
 
             //ProcPreGetNextDataFromPreData();
 
-            //return;
+            //ReadGPSDataToDB();
+
             timer1.Enabled = true;
         }
 
@@ -65,6 +67,9 @@ namespace M11XML
 
                 //讀取CGI原始資料轉檔到XML資料庫與DB資料庫
                 ReadDataToXMLDB();
+
+                //讀取GPS原始資料轉檔到DB資料庫
+                ReadGPSDataToDB();
 
                 //讀取委外資料轉檔到XML資料庫
                 //ReadOutDataToXMLDB();
@@ -1566,7 +1571,7 @@ namespace M11XML
                                         RD.Datetime = dtCheck;
                                         RD.DatetimeString = dtCheck.ToString("yyyy-MM-dd HH:mm:00");
                                         RD.GetTime = sGetTime;
-                                        RD.observation_num = sobservation_num;
+                                        RD.observation_num = sobservation_num ;
                                         RD.sensor_status = ssensor_status;
                                         RD.value = svalue;
                                         RD.remark = sRemark;
@@ -1934,6 +1939,56 @@ namespace M11XML
 
 
         /// <summary>
+        /// 讀取GPS原始資料轉檔到DB資料庫
+        /// </summary>
+        private void ReadGPSDataToDB()
+        {
+            try
+            {
+                //現在的時間預先補上個時段的資料到下一個時段的資料
+                ProcPreGetNextDataFromPreData();
+
+                //==========================================================================================================================
+
+                int iIndex = 1;
+
+                string[] aFiles = Directory.GetFiles(M11Const.Path_ChiisoSource);
+                // 取得資料夾內所有檔案
+                foreach (string fname in aFiles)
+                {
+                    ShowMessageToFront(string.Format("[{0}/{1}]讀取原始GPS資料轉檔到DB資料庫=={2}", iIndex.ToString(), aFiles.Length, fname));
+
+                    //轉檔GPS資料到資料庫中
+                    TransGPSDataToDB(fname);
+
+                    //移除超過四天資料
+                    //DateTime dtTemp = DateTime.Now.AddDays(-4);
+
+                    //將資料移到FTP QUEUE中，等待上傳
+                    FileInfo fi = new FileInfo(fname);
+                    string sFTPQueueSaveFileFullName = Path.Combine(M11Const.Path_FTPQueueGPSData, fi.Name);
+                    fi.CopyTo(sFTPQueueSaveFileFullName, true);
+
+                    iIndex++;
+                }
+
+                //全部處理完畢再一次刪除
+                foreach (string fname in aFiles)
+                {
+                    FileInfo fi = new FileInfo(fname);
+
+                    //刪除已處理資料
+                    fi.Delete();
+                }
+            }
+            catch (Exception)
+            {
+
+
+            }
+        }
+
+        /// <summary>
         /// 讀取原始資料轉檔到XML資料庫與DB資料庫
         /// </summary>
         private void ReadDataToXMLDB()
@@ -1967,7 +2022,7 @@ namespace M11XML
                 }
 
                 //全部處理完畢再一次刪除
-                foreach (string fname in Directory.GetFiles(M11Const.Path_Original))
+                foreach (string fname in aFiles)
                 {
                     FileInfo fi = new FileInfo(fname);
 
@@ -2175,6 +2230,63 @@ namespace M11XML
             }
         }
 
+        private string TransGPSData(string FileName)
+        {
+            //Dictionary<string, string> di = new Dictionary<string, string>();
+            string sResult = "";
+
+
+            try
+            {
+                List<string> GpsDataList = new List<string>();
+
+                string line = "";
+                using (StreamReader file = new StreamReader(FileName))
+                {
+                    while ((line = file.ReadLine()) != null)
+                    {
+                        if (line != "")
+                        {
+                            GpsDataList.Add(line);
+                        }
+                    }
+                }
+
+                if (GpsDataList.Count == 2)
+                {
+                    //固定取得第一筆資料來解析
+                    string[] GpsDatas = GpsDataList[1].Split(',');
+
+                    if (GpsDatas.Length == 8)
+                    {
+                        //string sDatatimeString = "";
+                        //string sGpsData = "";
+
+                        //轉譯時間字串==因為檔名已經有時間資料，所以檔案內的時間就不解析了
+
+                        //轉成GPS資料格式
+                        sResult = string.Format("{0} {1} {2} {3} {4} {5}"
+                            , GpsDatas[2]
+                            , GpsDatas[3]
+                            , GpsDatas[4]
+                            , GpsDatas[5]
+                            , GpsDatas[6]
+                            , GpsDatas[7]
+                            );
+                        //di.Add("GPS", sGpsData);
+
+                    }
+
+                }
+            }
+            catch (Exception)
+            {
+                return sResult;
+            }
+
+            return sResult;
+        }
+
         private Dictionary<string, string> TransCGIData(string FileName) 
         {
             Dictionary<string, string> di = new Dictionary<string, string>();
@@ -2338,6 +2450,66 @@ namespace M11XML
                     dbDapper.Insert<CgiStationData>(tmpData);
                 }
             }
+        }
+
+
+        /// <summary>
+        /// 轉檔GPS資料到資料庫中
+        /// </summary>
+        /// <param name="fname"></param>
+        private void TransGPSDataToDB(string fname)
+        {
+            //分析時間
+            FileInfo fi = new FileInfo(fname);
+            string[] CgiNameSplit = fi.Name.Replace(fi.Extension, "").Split('-');
+
+            //避免舊檔案格式問題，排除沒有分析完整的檔案名稱
+            //檔案格式：DS002_04-GPS-20210627092000.txt
+            if (CgiNameSplit.Length != 3) return;
+
+            string StationName = CgiNameSplit[0];
+
+            DateTime dt = Utils.getStringToDateTime(CgiNameSplit[2]);                        
+            string sDatetimeString = M11DatetimeToString(dt);
+
+            //取得下一個時段資料庫資料
+            ssql = @"
+                    select * from CgiStationData where Station = '{0}' and DatetimeString = '{1}'                                                            
+                    ";
+            ssql = string.Format(ssql, StationName, sDatetimeString);
+            List<CgiStationData> lstData = dbDapper.Query<CgiStationData>(ssql);
+
+            //解析GPS檔案中的資料
+            string sValue = TransGPSData(fi.FullName);
+            string sDataType = M11Const.SensorDataType_GPS;
+            //判斷資料是否存在
+            List<CgiStationData> tmp = lstData.Where(c => c.DataType == sDataType).ToList();
+            
+
+            //寫入資料庫
+            if (tmp.Count >= 1)
+            {
+                //更新資料
+                CgiStationData tmpData = tmp[0];
+                tmpData.Value = sValue;
+                tmpData.Status = "Y";
+                dbDapper.Update<CgiStationData>(tmpData);
+            }
+            else
+            {
+                //新增資料
+                CgiStationData tmpData = new CgiStationData();
+                tmpData.DatetimeString = sDatetimeString;
+                //ID跟Cgi都先用GPS
+                tmpData.ID = M11Const.SensorDataType_GPS;
+                tmpData.Cgi = M11Const.SensorDataType_GPS;
+                tmpData.Station = StationName;
+                tmpData.DataType = sDataType;
+                tmpData.Value = sValue;
+                tmpData.Status = "Y";
+                dbDapper.Insert<CgiStationData>(tmpData);
+            }
+
         }
 
         /// <summary>

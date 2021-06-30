@@ -33,6 +33,11 @@ namespace M11XmlHistory
             Directory.CreateDirectory(M11Const.Path_PrecipitationWeb7Day);
 
 
+            string ss = "55";
+            int iiii  = ss.CompareTo("50");
+
+
+
 
 
             timer1.Enabled = true;         

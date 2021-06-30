@@ -16,9 +16,9 @@ using M11System;
 
 namespace M11FTP
 {
-    public partial class FTPMainForm : BaseForm
+    public partial class MainFormFTP : BaseForm
     {
-        public FTPMainForm()
+        public MainFormFTP()
         {
             InitializeComponent();
             base.InitForm();
@@ -37,6 +37,8 @@ namespace M11FTP
             Directory.CreateDirectory(M11Const.Path_XmlResultWeb);
             Directory.CreateDirectory(M11Const.Path_XmlResultWeb7Day);
             Directory.CreateDirectory(M11Const.Path_FTPQueueXmlResult7Day);
+            Directory.CreateDirectory(M11Const.Path_FTPQueueGPSData);
+            
 
             timer1.Enabled = true;
         }
@@ -321,6 +323,88 @@ namespace M11FTP
             //}
         }
 
+        /// <summary>
+        /// GPS資料上傳到FTP
+        /// </summary>
+        private void UploadGpsToFTP()
+        {
+            ShowMessageToFront("[]FTP-上傳GPS檔案==啟動");
+            //上傳CgiData
+            FtpClient client = new FtpClient();
+            try
+            {
+                client.Host = M11Const.FTP_IP;
+                client.SocketKeepAlive = true;
+                client.Credentials = new NetworkCredential(M11Const.FTP_User, M11Const.FTP_Password);
+                client.Connect();
+
+                // 取得資料夾內所有檔案
+                int iIndex = 1;
+
+                string[] aFiles = Directory.GetFiles(M11Const.Path_FTPQueueGPSData);
+                foreach (string fname in aFiles)
+                {
+                    try
+                    {
+                        //FTP上傳路徑規劃
+                        ///M11_System/Data/GpsData/2021/03/21
+
+                        FileInfo fi = new FileInfo(fname);
+                        string[] CcdNameSplit = fi.Name.Replace(fi.Extension, "").Split('-');
+
+                        //避免舊檔案格式問題，排除沒有分析完整的檔案名稱
+                        if (CcdNameSplit.Length != 3) continue;
+
+                        string sDataTime = CcdNameSplit[2];
+                        
+                        //從檔案取得資料時間
+                        DateTime dt = Utils.getStringToDateTime(sDataTime);
+
+                        //FluentFTP 起始路徑都是跟目錄開始，目錄結尾都是/
+                        string sLocalPath = fi.FullName;
+                        string sRemotePath = "/M11_System/Data/GpsData/";
+                        sRemotePath = string.Format(@"{0}{1}/{2}/{3}/{4}"
+                                , sRemotePath, dt.ToString("yyyy"), dt.ToString("MM"), dt.ToString("dd"), fi.Name);
+
+                        //設定嘗試次數
+                        client.RetryAttempts = 3;
+                        //上傳檔案
+                        client.UploadFile(sLocalPath, sRemotePath, FtpRemoteExists.Overwrite, true, FtpVerify.Retry);
+                        ShowMessageToFront(string.Format("[{0}/{1}]上傳CCD檔案 成功=={2}", iIndex.ToString(), aFiles.Length, fname));
+                        iIndex++;
+
+                        //存至備份資料夾
+                        //fi.CopyTo(Path.Combine(M11Const.Path_FTPQueueTxtOriginalBak, fi.Name), true);
+
+                        //刪除已處理資料
+                        fi.Delete();
+                    }
+                    catch (Exception ex)
+                    {
+                        //有錯誤持續執行
+                        continue;
+                    }
+                }
+            }
+            finally
+            {
+                client.Disconnect();
+                client.Dispose();
+            }
+
+            //全部處理完畢再一次刪除
+            //foreach (string fname in lstFile)
+            //{
+            //    FileInfo fi = new FileInfo(fname);
+
+            //    //存至備份資料夾
+            //    fi.CopyTo(Path.Combine(M11Const.Path_FTPQueueTxtOriginalBak, fi.Name), true);
+
+            //    //刪除已處理資料
+            //    fi.Delete();
+            //}
+        }
+
 
         /// <summary>
         /// 上傳FTP序列中的檔案
@@ -335,6 +419,9 @@ namespace M11FTP
 
             //CCD資料上傳到FTP
             UploadCcdToFTP();
+
+            //GPS資料上傳到FTP
+            UploadGpsToFTP();
         }
         
     }
