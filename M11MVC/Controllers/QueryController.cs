@@ -80,6 +80,7 @@ namespace M11MVC.Controllers
             string TM = dParams["TM"];
             string PM = dParams["PM"];
             string GW = dParams["GW"];
+            string GPS = dParams["GPS"];
             string stimerange = dParams["timerange"];
 
             List<string> lstSensor = new List<string>();
@@ -94,6 +95,7 @@ namespace M11MVC.Controllers
             
             if (PM == "Y") lstSensor.Add("PM");
             if (GW == "Y") lstSensor.Add("GW");
+            if (GPS == "Y") lstSensor.Add("GPS");
 
             string sInSensor = string.Join("','", lstSensor.ToArray());
 
@@ -139,6 +141,7 @@ namespace M11MVC.Controllers
             string TM = dParams["TM"];
             string PM = dParams["PM"];
             string GW = dParams["GW"];
+            string GPS = dParams["GPS"];
             string stimerange = dParams["timerange"];
 
             List<string> lstSensor = new List<string>();
@@ -153,6 +156,7 @@ namespace M11MVC.Controllers
             
             if (PM == "Y") lstSensor.Add("PM");
             if (GW == "Y") lstSensor.Add("GW");
+            if (GPS == "Y") lstSensor.Add("GPS");
 
             string sInSensor = string.Join("','", lstSensor.ToArray());
 
@@ -162,13 +166,15 @@ namespace M11MVC.Controllers
             // 20200429 只顯示小時數據
             ssql = @"
                 select distinct a.SiteID, a.StationID,a.DatetimeString,b.datavalue 
-                ,RG.value RGvalue,TM.value TMvalue,PM.value PMvalue,GW.value GWvalue,TM1.value TM1value,TM2.value TM2value  
+                ,RG.value RGvalue,TM.value TMvalue,PM.value PMvalue,GW.value GWvalue,GPS.value GPSvalue
+                ,TM1.value TM1value,TM2.value TM2value  
                 from Result10MinData a 
 			    left join BasM11Setting b on a.siteid = b.dataitem and b.datatype = 'SiteCName'
                 left join Result10MinData RG on a.StationID = RG.StationID and RG.SensorID = 'RG' and a.DatetimeString = RG.DatetimeString
                 left join Result10MinData TM on a.StationID = TM.StationID and TM.SensorID = 'TM' and a.DatetimeString = TM.DatetimeString
                 left join Result10MinData PM on a.StationID = PM.StationID and PM.SensorID = 'PM' and a.DatetimeString = PM.DatetimeString
                 left join Result10MinData GW on a.StationID = GW.StationID and GW.SensorID = 'GW' and a.DatetimeString = GW.DatetimeString
+                left join Result10MinData GPS on a.StationID = GPS.StationID and GPS.SensorID = 'GPS' and a.DatetimeString = GPS.DatetimeString
                 left join Result10MinData TM1 on a.StationID = TM1.StationID and TM1.SensorID = 'TM1' and a.DatetimeString = TM1.DatetimeString
                 left join Result10MinData TM2 on a.StationID = TM2.StationID and TM2.SensorID = 'TM2' and a.DatetimeString = TM2.DatetimeString
                 where a.StationID = '{0}'                 
@@ -212,6 +218,13 @@ namespace M11MVC.Controllers
             //GW
             head.Add("[GW]水位高(m)");
             head.Add("[GW]相對水位高(m)");
+            //GPS
+            head.Add("[GPS]E(m)");
+            head.Add("[GPS]N(m)");
+            head.Add("[GPS]H(m)");
+            head.Add("[GPS]方位角(度)");
+            head.Add("[GPS]三軸變位速率(mm/天)");
+            head.Add("[GPS]平面變位速率(mm/天)");
             //TM1
             head.Add("[TM1]方位一觀測值(秒)");
             head.Add("[TM1]方位二觀測值(秒)");
@@ -226,11 +239,6 @@ namespace M11MVC.Controllers
             head.Add("[TM2]方位二累積變位量(秒)");
             head.Add("[TM2]方位一速率(秒/天)");
             head.Add("[TM2]方位二速率(秒/天)");
-
-            //Func<string,string,List<string>> SensorValuePaser
-
-
-
 
             List<string[]> datas = new List<string[]>();
             foreach (dynamic item in Result10MinDatas)
@@ -310,6 +318,25 @@ namespace M11MVC.Controllers
                 if (item.GWvalue != null)
                 {
                     string[] aValue = item.GWvalue.Split(' ');
+                    for (int i = 0; i < aValue.Length; i++)
+                    {
+                        lstTmp[i] = aValue[i];
+                    }
+                }
+                foreach (string value in lstTmp)
+                {
+                    cols.Add(value);
+                }
+
+                //[GPS]數據拆開各自一個欄位
+                lstTmp.Clear();
+                for (int i = 0; i < 6; i++)
+                {
+                    lstTmp.Add("");
+                }
+                if (item.GPSvalue != null)
+                {
+                    string[] aValue = item.GPSvalue.Split(' ');
                     for (int i = 0; i < aValue.Length; i++)
                     {
                         lstTmp[i] = aValue[i];

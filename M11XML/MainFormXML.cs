@@ -42,12 +42,14 @@ namespace M11XML
             Directory.CreateDirectory(M11Const.Path_FTPQueueGPSData);
 
 
-            //DateTime dtCheck = new DateTime(2021, 3, 13, 17, 30, 8);
+            //DateTime dtCheck = new DateTime(2021, 7, 1, 17, 20, 8);
             //ReadOutDataToDB(dtCheck);
 
             //ProcPreGetNextDataFromPreData();
 
             //ReadGPSDataToDB();
+
+            //ProcGenResultXML(dtCheck);
 
             timer1.Enabled = true;
         }
@@ -61,6 +63,8 @@ namespace M11XML
                 ShowMessageToFront("轉檔啟動");
 
                 DateTime dtCheck = DateTime.Now;
+
+                dtCheck = new DateTime(2021, 7, 1, 17, 20, 8);
 
                 //產生Station設定檔中的XML
                 InitStationXML();
@@ -171,7 +175,10 @@ namespace M11XML
                 case "PM":
                     //sResult = getPiezoMeter(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
                     sResult = getPiezoMeterFromDB(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
-                    
+                    break;
+                case "GPS":
+                    //sResult = getPiezoMeter(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
+                    sResult = getGPSDataFromDB(SensorRow, dtCheck, ref dtGetDataTime, ref sCgiData);
                     break;
                 default:
                     sResult = "";
@@ -956,6 +963,46 @@ namespace M11XML
 
             return sResult;
         }
+
+        /// <summary>
+        /// 取得GPS資料結果(GPS)
+        /// </summary>
+        /// <param name="StationName">站名</param>
+        /// <param name="SensorName">儀器名稱</param>
+        /// <param name="dtCheck">比對時間點</param>
+        /// <returns></returns>
+        private string getGPSDataFromDB(BasStationSensor SensorRow, DateTime dtCheck, ref DateTime dtGetDataTime, ref string sCgiData)
+        {
+            string sResult = "0 0 0 0 0 0";
+            string StationName = SensorRow.Station;
+            string SensorName = SensorRow.Sensor;
+
+            //預設為0 0 0 0 0 0
+            string sGpsData = "0 0 0 0 0 0";
+            //[GPS]
+            ssql = @"
+                    select * from CgiStationData where Station = '{0}' and DatetimeString = '{1}' and datatype = '{2}'
+                    ";
+            ssql = string.Format(ssql, StationName, M11DatetimeToString(dtCheck), M11Const.SensorDataType_GPS);
+            List<CgiStationData> lstData = dbDapper.Query<CgiStationData>(ssql);
+
+            if (lstData.Count() > 0)
+            {
+                sResult  = lstData[0].Value;
+                sCgiData = lstData[0].Value;
+                //紀錄資料時間
+                dtGetDataTime = Utils.getStringToDateTime(lstData[0].DatetimeString);
+            }            
+
+            //儀器異常，則不顯示數值
+            if (SensorRow.DefaultWater == "-999")
+            {
+                sResult = sGpsData;
+            }
+
+            return sResult;
+        }
+
 
         /// <summary>
         /// 取得水位資料結果(TM)
@@ -1838,6 +1885,9 @@ namespace M11XML
                     break;
                 case "PM":
                     sResult = "2";
+                    break;
+                case "GPS":
+                    sResult = "6";
                     break;
                 //case "RG":
                 //    sResult = "RainGauge";

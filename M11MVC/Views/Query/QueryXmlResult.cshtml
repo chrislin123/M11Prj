@@ -37,27 +37,33 @@
                 <label for="keyWord">測站：</label>
                 <select id="station" name="station" class="form-control"></select>
                 <label for="keyWord">儀器：</label>
-                <div class="form-control" style="height:60px;" >
+                <div class="form-control" style="height:60px;">
                     <input id="RG" type="checkbox" /><span class="text">RG(雨量計) &nbsp; &nbsp; &nbsp;  </span>
                     <input id="TM" type="checkbox" /><span class="text">TM(雙軸傾斜儀)</span><br />
                     <input id="PM" type="checkbox" /><span class="text">PM(孔隙水壓計)</span>
                     <input id="GW" type="checkbox" /><span class="text">GW(地下水位計)</span>
+                    <input id="GPS" type="checkbox" /><span class="text">GPS(雙頻GPS地表變位)</span>
                 </div>
+                <div class="form-control" style="height:60px;">
                     <label for="keyWord">起始時間：</label>
-                    <input type="text" id="StartDate" name="StartDate" value="" style="width: 80px;" />
+                    <input type="text" id="StartDate" name="StartDate" value="" style="width: 80px;" /><br />
                     <label for="keyWord">結束時間：</label>
                     <input type="text" id="EndDate" name="EndDate" value="" style="width: 80px;" />
-                    <label for="keyWord">間隔：</label>
-                    <select id="timerange" name="timerange" class="form-control">
+                </div>
+
+                <div class="form-control" style="height:60px;">
+                    <label for="keyWord">間隔：</label><br />
+                    <select id="timerange" name="timerange" class="form-control" style="height:27px;">
                         <option value="hr">小時</option>
                         <option value="min">分鐘</option>
                     </select>
-                    @*<label for="keyWord">密碼：</label>
-            <input type="text" id="txtpass" name="txtpass" value="" />*@
-                    <button class="btn btn-success" id="btnQuery" onclick="Query();">查詢</button>
-                    <button class="btn btn-success" id="btnExport" onclick="Export();">匯出</button>
                 </div>
-            </div>
+                @*<div class="form-control" style="height:60px;"></div>*@
+                      
+                <button class="btn btn-success" id="btnQuery" onclick="Query();">查詢</button>
+                <button class="btn btn-success" id="btnExport" onclick="Export();">匯出</button>
+                    
+                
     </div>
 </div>
 
@@ -123,6 +129,7 @@
         Params.TM = $("#TM").prop('checked') == true ? "Y" : "N";
         Params.PM = $("#PM").prop('checked') == true ? "Y" : "N";
         Params.GW = $("#GW").prop('checked') == true ? "Y" : "N";
+        Params.GPS = $("#GPS").prop('checked') == true ? "Y" : "N";
         Params.timerange = $("#timerange").val();
         
 
@@ -165,6 +172,7 @@
         Params.TM = $("#TM").prop('checked') == true ? "Y" : "N";
         Params.PM = $("#PM").prop('checked') == true ? "Y" : "N";
         Params.GW = $("#GW").prop('checked') == true ? "Y" : "N";
+        Params.GPS = $("#GPS").prop('checked') == true ? "Y" : "N";
         Params.timerange = $("#timerange").val();
 
         $.getJSON('@Url.Action("DownRainStatistics", "Query")', { Params: JSON.stringify(Params) }, function (response) {
