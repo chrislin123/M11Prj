@@ -9,33 +9,89 @@ namespace M11System
 {
     public static class M11Const
     {
-
+        /// <summary>
+        /// @"D:\M11\Data\Original"
+        /// </summary>
         public static string Path_Original = @"D:\M11\Data\Original";
+        /// <summary>
+        /// @"D:\M11\Data\XmlResult"
+        /// </summary>
         public static string Path_XmlResult = @"D:\M11\Data\XmlResult";
+        /// <summary>
+        /// @"D:\M11\Data\FTPQueueTxtOriginal"
+        /// </summary>
         public static string Path_FTPQueueTxtOriginal = @"D:\M11\Data\FTPQueueTxtOriginal";
+        /// <summary>
+        /// @"D:\M11\Data\FTPQueueTxtOriginalBak"
+        /// </summary>
         public static string Path_FTPQueueTxtOriginalBak = @"D:\M11\Data\FTPQueueTxtOriginalBak";
+        /// <summary>
+        /// @"D:\M11\Data\FTPQueueXmlResult"
+        /// </summary>
         public static string Path_FTPQueueXmlResult = @"D:\M11\Data\FTPQueueXmlResult";
+        /// <summary>
+        /// @"D:\M11\Data\FTPQueueXmlResultBak"
+        /// </summary>
         public static string Path_FTPQueueXmlResultBak = @"D:\M11\Data\FTPQueueXmlResultBak";
+        /// <summary>
+        /// @"D:\M11\Data\FTPQueueXmlResult7Day"
+        /// </summary>
         public static string Path_FTPQueueXmlResult7Day = @"D:\M11\Data\FTPQueueXmlResult7Day";
+        /// <summary>
+        /// @"D:\M11\Data\FTPQueueCcdResult"
+        /// </summary>
         public static string Path_FTPQueueCcdResult = @"D:\M11\Data\FTPQueueCcdResult";
+        /// <summary>
+        /// @"D:\M11\Data\FTPQueueGPSData"
+        /// </summary>
         public static string Path_FTPQueueGPSData = @"D:\M11\Data\FTPQueueGPSData";
-        public static string Path_CcdResultHist = @"D:\M11\Data\CcdResultHist";        
+        /// <summary>
+        /// @"D:\M11\Data\CcdResultHist"
+        /// </summary>
+        public static string Path_CcdResultHist = @"D:\M11\Data\CcdResultHist";
+        /// <summary>
+        /// @"D:\M11\DBSimulation"
+        /// </summary>
         public static string Path_DBSimulation = @"D:\M11\DBSimulation";
 
         //備份相關
+        /// <summary>
+        /// @"D:\M11\Data\20-BackupData\CGIData"
+        /// </summary>
         public static string Path_BackupCGIData = @"D:\M11\Data\20-BackupData\CGIData";
+        /// <summary>
+        /// @"D:\M11\Data\20-BackupData\CGIDataZip"
+        /// </summary>
         public static string Path_BackupCGIDataZip = @"D:\M11\Data\20-BackupData\CGIDataZip";
 
         //GPS相關
+        /// <summary>
+        /// @"D:\FTP\Data\chiiso"
+        /// </summary>
         public static string Path_ChiisoSource = @"D:\FTP\Data\chiiso";
 
         //發布網站相關
+        /// <summary>
+        /// @"D:\M11\M11Web\dsmon\am"
+        /// </summary>
         public static string Path_XmlResultWeb = @"D:\M11\M11Web\dsmon\am";
+        /// <summary>
+        /// @"D:\M11\M11Web\dsmon\amhist"
+        /// </summary>
         public static string Path_XmlResultWeb7Day = @"D:\M11\M11Web\dsmon\amhist";
+        /// <summary>
+        /// @"D:\M11\M11Web\dsmon\pmhist"
+        /// </summary>
         public static string Path_PrecipitationWeb7Day = @"D:\M11\M11Web\dsmon\pmhist";
+        /// <summary>
+        /// @"D:\M11\M11Web\dsmon\vm"
+        /// </summary>
         public static string Path_CcdResultWeb = @"D:\M11\M11Web\dsmon\vm";
 
         //CCTV相關
+        /// <summary>
+        ///  @"D:\FTP\Data\cctv"
+        /// </summary>
         public static string Path_CcdSource = @"D:\FTP\Data\cctv";
 
         public static string FilePath_SchemaCGIData = Path.Combine(@"D:\M11\DBSimulation", "Schema_CGIData.xml");

@@ -1,6 +1,6 @@
 ﻿namespace M11CCD
 {
-    partial class MainForm
+    partial class MainFormCCD
     {
         /// <summary>
         /// Required designer variable.

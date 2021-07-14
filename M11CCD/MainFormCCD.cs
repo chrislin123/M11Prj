@@ -18,9 +18,9 @@ using M11System.Model.M11;
 
 namespace M11CCD
 {
-    public partial class MainForm : BaseForm
+    public partial class MainFormCCD : BaseForm
     {
-        public MainForm()
+        public MainFormCCD()
         {
             InitializeComponent();
             base.InitForm();
@@ -116,64 +116,84 @@ namespace M11CCD
                     
                 //取得資料夾所有檔案
                 int iIndex = 1;
-                string[] FileLists = Directory.GetFiles(M11Const.Path_CcdSource);
+                string[] FileLists = Directory.GetFiles(M11Const.Path_CcdSource, "*.*", SearchOption.AllDirectories);
                 foreach (string fname in FileLists)
                 {
                     FileInfo fi = new FileInfo(fname);
 
-                    
-                    //解析檔名及檔案時間
-                    string[] sTempNames = fi.Name.Replace(fi.Extension, "").Split('_');
-                    if (sTempNames.Length != 3) continue; //檔名格式不符合
+                    //虛擬站名(盛邦對應的名稱)
+                    //string sVirtualStationNm = "";
+                    CcdProcClass VirtualCcd = new CcdProcClass();
 
-                    string sStationNm = sTempNames[0];
-                    string sDataTime = sTempNames[1] + sTempNames[2];
-                    if (sTempNames[1].Length != 8) continue; //日期格式不符合
-                    if (sTempNames[2].Length != 6) continue; //時間格式不符合
+                    //使用完整的檔案路徑判斷屬於哪一個CCD儀器
+                    foreach (KeyValuePair<string,CcdProcClass> item in diCcdData)
+                    {
+                        if (fname.Contains(item.Key) == true)
+                        {
+                            VirtualCcd = item.Value;
+                            break;
+                        }
+                    }
+
+                    string sDataTime = "";
+                    //解析檔名及檔案時間
+                    if (VirtualCcd.ProcalName == "Wanshan")
+                    {
+                        string[] sTempNames = fi.Name.Replace(fi.Extension, "").Split('_');
+                        if (sTempNames.Length != 3) continue; //檔名格式不符合
+
+                        //sStationNm = sTempNames[0];
+                        sDataTime = sTempNames[1] + sTempNames[2];
+                        if (sTempNames[1].Length != 8) continue; //日期格式不符合
+                        if (sTempNames[2].Length != 6) continue; //時間格式不符合
+                    }
+                    else //ProcalName = "CCD1","CCD2","CCD3","CCD4","CCD5","CCD6"
+                    {
+                        string sFileName = fi.Name.Replace(fi.Extension, "");
+                        //U00C0T20210714150008382
+                        //檔名格式不符合
+                        if (sFileName.Length != 23) continue; 
+
+                        sDataTime = sFileName.Substring(6,14);
+                    }
 
                     DateTime dtFileName = Utils.getStringToDateTime(sDataTime);
-
 
                     //判斷是否為5分鐘內產生
                     if (dtFileName < dtStart || dtFileName > dtEnd) continue; //超過該時段區間
 
-                    //判斷是否存在
-                    if (diCcdData.ContainsKey(sStationNm) == true)
+                    //比較紀錄最新日期
+                    if (dtFileName > VirtualCcd.dtGet)
                     {
-                        //比較紀錄最新日期
-                        if (dtFileName > diCcdData[sStationNm].dtGet)
-                        {
-                            diCcdData[sStationNm].dtGet = dtFileName;
-                            diCcdData[sStationNm].FileFullName = fname;
-                        }
+                        VirtualCcd.dtGet = dtFileName;
+                        VirtualCcd.FileFullName = fname;
                     }
-                }
+                    
 
-                //處理檔案搬移到發布區及上傳區
-                foreach (string item in diCcdData.Keys)
-                {
-                    FileInfo fi = new FileInfo(diCcdData[item].FileFullName);
-                    if (fi.Exists == true)
-                    {
-                        //網頁發布路徑測試目標資料夾並新增
-                        string sSaveFolderFullName = Path.Combine(M11Const.Path_CcdResultWeb, diCcdData[item].M11FolderName);
-                        Directory.CreateDirectory(sSaveFolderFullName);
+                    //處理檔案搬移到發布區及上傳區
+                    //FileInfo fi = new FileInfo(diCcdData[item].FileFullName);
+                    //if (fi.Exists == true)
+                    //{ }
+                    //網頁發布路徑測試目標資料夾並新增
+                    string sSaveFolderFullName = Path.Combine(M11Const.Path_CcdResultWeb, VirtualCcd.M11FolderName);
+                    Directory.CreateDirectory(sSaveFolderFullName);
 
-                        //儲存到網頁發布路徑
-                        string sM11FileName = diCcdData[item].M11Name + fi.Extension;
-                        string sSaveFileFullName = Path.Combine(sSaveFolderFullName, sM11FileName);
-                        fi.CopyTo(sSaveFileFullName, true);
+                    //儲存到網頁發布路徑
+                    string sM11FileName = VirtualCcd.M11Name + fi.Extension;
+                    string sSaveFileFullName = Path.Combine(sSaveFolderFullName, sM11FileName);
+                    fi.CopyTo(sSaveFileFullName, true);
 
-                        //儲存到準備FTP上傳路徑
-                        string sM11FtpFileName = string.Format("{0}-{1}-{2}.jpeg", diCcdData[item].M11Name
-                            , dtCheck.ToString("yyyyMMdd"), dtCheck.ToString("HHmmss"));
-                        string sFTPQueueSaveFileFullName = Path.Combine(M11Const.Path_FTPQueueCcdResult, sM11FtpFileName);
-                        fi.CopyTo(sFTPQueueSaveFileFullName, true);
+                    //儲存到準備FTP上傳路徑
+                    string sM11FtpFileName = string.Format("{0}-{1}-{2}.{3}", VirtualCcd.M11Name
+                        , dtCheck.ToString("yyyyMMdd"), dtCheck.ToString("HHmmss"), fi.Extension.Replace(".",""));
+                    string sFTPQueueSaveFileFullName = Path.Combine(M11Const.Path_FTPQueueCcdResult, sM11FtpFileName);
+                    fi.CopyTo(sFTPQueueSaveFileFullName, true);
 
-                        //儲存到5日歷史區                       
-                        string sCcdResultHistSaveFileFullName = Path.Combine(M11Const.Path_CcdResultHist, sM11FtpFileName);
-                        fi.CopyTo(sCcdResultHistSaveFileFullName, true);
-                    }
+                    //儲存到5日歷史區                       
+                    string sCcdResultHistSaveFileFullName = Path.Combine(M11Const.Path_CcdResultHist, sM11FtpFileName);
+                    fi.CopyTo(sCcdResultHistSaveFileFullName, true);
+                   
+
                 }
 
                 System.Threading.Thread.Sleep(500);
@@ -186,12 +206,12 @@ namespace M11CCD
                     {
                         new FileInfo(fname).Delete();
                     }
-                    catch 
+                    catch
                     {
                         continue;
                     }
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -203,11 +223,11 @@ namespace M11CCD
 
         public class CcdProcClass
         {
-            public string ProcalName;
-            public string M11Name;
-            public string M11FolderName;
+            public string ProcalName ="";
+            public string M11Name = "";
+            public string M11FolderName = "";
             public DateTime dtGet;
-            public string FileFullName;
+            public string FileFullName = "";
         }
 
         /// <summary>

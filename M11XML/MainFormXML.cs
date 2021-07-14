@@ -64,7 +64,7 @@ namespace M11XML
 
                 DateTime dtCheck = DateTime.Now;
 
-                dtCheck = new DateTime(2021, 7, 1, 17, 20, 8);
+                //dtCheck = new DateTime(2021, 7, 1, 17, 20, 8);
 
                 //產生Station設定檔中的XML
                 InitStationXML();
@@ -1850,6 +1850,9 @@ namespace M11XML
                     break;
                 case "PM":
                     sResult = "PiezoMeter";
+                    break;
+                case "GPS":
+                    sResult = "GPSForecast3db";
                     break;
                 //case "RG":
                 //    sResult = "RainGauge";

@@ -28,30 +28,35 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                @Html.ActionLink("大規模崩塌平台", "SetBureauActive", "System", new { area = "" }, new { @class = "navbar-brand" })
+                @Html.ActionLink("大規模崩塌平台", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     @*<li>@Html.ActionLink("即時", "warnlist", "warn", new { area = "" }, null)</li>
-                    <li>@Html.ActionLink("地圖", "map", "map", new { area = "" }, null)</li>
-                    <li>@Html.ActionLink("歷史", "warnhislist", "warn", new { area = "" }, null)</li>*@
+        <li>@Html.ActionLink("地圖", "map", "map", new { area = "" }, null)</li>
+        <li>@Html.ActionLink("歷史", "warnhislist", "warn", new { area = "" }, null)</li>*@
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">查詢作業<b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            @*<li>@Html.ActionLink("即時雨量", "QueryRain", "Rain", new { area = "" }, null)</li>*@
-                            <li>@Html.ActionLink("統計資料查詢", "QueryRainStatistics", "Rain", new { area = "" }, null)</li>
-                            @*<li>@Html.ActionLink("土石流警戒基準值(RTI)", "QueryRTI", "Rain", new { area = "" }, null)</li>
-                            <li>@Html.ActionLink("崩塌警戒基準值(RTI3)", "QueryRTI3", "Rain", new { area = "" }, null)</li>*@
+                            <li>@Html.ActionLink("測站XML結果資料查詢", "QueryXmlResult", "Query", new { area = "" }, null)</li>
+                            @*<li><a href="http://140.116.249.143/dsmon/am/PrecipitationToday.xml">統計資料查詢</a></li>*@
                         </ul>
                     </li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">維護作業<b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             <li>@Html.ActionLink("氣象局回傳啟動設定", "SetBureauActive", "System", new { area = "" }, null)</li>
-                            @*<li>@Html.ActionLink("即時單站雨量站逐時雨量", "ExpRainStation", "Rain", new { area = "" }, null)</li>
-                            <li>@Html.ActionLink("各雨量站累積雨量座標", "ExpStationCoord", "Rain", new { area = "" }, null)</li>
-                            <li>@Html.ActionLink("雨場分割資料下載", "ExpRainArea", "Rain", new { area = "" }, null)</li>
-                            <li>@Html.ActionLink("氣象局歷史雨量下載", "ExpWeaRainHis", "Rain", new { area = "" }, null)</li>*@
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">回傳查詢<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="http://140.116.249.143/dsmon/am/10min_a_ds_data.xml" target="_blank">10分鐘大規模崩塌監測資料</a></li>
+                            <li><a href="http://140.116.249.143/dsmon/amhist/" target="_blank">10分鐘大規模崩塌監測歷史資料</a></li>
+                            <li><a href="http://140.116.249.143/dsmon/am/PrecipitationToday.xml" target="_blank">雨量站回傳氣象局</a></li>
+                            <li><a href="http://140.116.249.143/dsmon/pmhist/" target="_blank">雨量站回傳氣象局歷史資料</a></li>
+                            <li><a href="http://140.116.249.143/dsmon/vm/" target="_blank">CCD照片資料</a></li>
+                            @*<li>@Html.ActionLink("氣象局回傳啟動設定", "SetBureauActive", "System", new { area = "" }, null)</li>*@
                         </ul>
                     </li>
                 </ul>

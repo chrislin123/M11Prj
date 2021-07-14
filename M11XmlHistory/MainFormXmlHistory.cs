@@ -121,7 +121,7 @@ namespace M11XmlHistory
                 //移除超過七天資料                
                 //DateTime dtNow7D = DateTime.Now.AddDays(-7);
                 //20210429 改維持30天
-                DateTime dtNow7D = DateTime.Now.AddDays(-30);
+                DateTime dtNow7D = DateTime.Now.AddDays(-1095);
                 //
                 DateTime dt7Day = new DateTime(dtNow7D.Year, dtNow7D.Month, dtNow7D.Day, 0, 0, 0);
 

@@ -154,7 +154,8 @@
 
         $.ajax({
             type: "POST",
-            url: "/System/SetBureauActiveSave",
+            /*url: "../System/SetBureauActiveSave",*/
+            url : '@Url.Action("SetBureauActiveSave", "System")',
             data: JSON.stringify(BasRainallStations),
         /*contentType: "application/json; charset=utf-8",*/
             contentType: "application/json; charset=utf-8",
