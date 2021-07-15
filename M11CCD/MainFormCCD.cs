@@ -36,6 +36,17 @@ namespace M11CCD
 
             //int test = dtCheck.Minute % 5;
 
+            //DateTime dtCheck = DateTime.Now.AddMinutes(25);
+
+            //for (int i = 0; i < 60; i++)
+            //{
+            //    dtCheck = dtCheck.AddMinutes(1);
+            //    ProcRemoveCCD(dtCheck);
+            //}
+
+            
+
+
             timer1.Enabled = true;
         }
 
@@ -90,8 +101,9 @@ namespace M11CCD
                 if (dtCheck.Minute % 5 != 0) return;
 
                 dtCheck = Utils.getStringToDateTime(dtCheck.ToString("yyyy-MM-dd HH:mm:00"));
+                //20210715 因為盛邦儀器時間不準，所以拉大時間範圍抓影像資料
                 DateTime dtStart = Utils.getStringToDateTime(dtCheck.AddMinutes(-5).ToString("yyyy-MM-dd HH:mm:00"));
-                DateTime dtEnd = Utils.getStringToDateTime(dtCheck.ToString("yyyy-MM-dd HH:mm:00"));
+                DateTime dtEnd = Utils.getStringToDateTime(dtCheck.AddMinutes(3).ToString("yyyy-MM-dd HH:mm:00"));
 
                 //取得有設定的資料清單
                 List<string> lstStation = new List<string>();
@@ -238,7 +250,7 @@ namespace M11CCD
             try
             {
                 //預計排程每分鐘執行一次，每一小時執行一次
-                if (dtCheck.Minute.ToString() != "00") return;
+                if (dtCheck.Minute != 0) return;
 
                 //移除超過5天的資料
                 dtCheck = dtCheck.AddDays(-5);
