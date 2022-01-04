@@ -13,6 +13,12 @@ using System.Xml;
 using FluentFTP;
 using System.Net;
 using M11System;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Drive.v3;
+using Google.Apis.Drive.v3.Data;
+using Google.Apis.Services;
+using Google.Apis.Util.Store;
+using System.Configuration;
 
 namespace M11FTP
 {
@@ -38,7 +44,7 @@ namespace M11FTP
             Directory.CreateDirectory(M11Const.Path_XmlResultWeb7Day);
             Directory.CreateDirectory(M11Const.Path_FTPQueueXmlResult7Day);
             Directory.CreateDirectory(M11Const.Path_FTPQueueGPSData);
-            
+            Directory.CreateDirectory(M11Const.Path_FTPQueueCcdResult);
 
             timer1.Enabled = true;
         }
@@ -321,6 +327,138 @@ namespace M11FTP
             //    //刪除已處理資料
             //    fi.Delete();
             //}
+        }        
+
+        /// <summary>
+        /// CCD資料上傳到GoogleDrive
+        /// </summary>
+        private void UploadCcdToGoogleDrive()
+        {
+            //G:\我的雲端硬碟\Project\M11\Data\ProjectData\Ccd\CcdHistory
+            string sCCDHistoryParentId = "1HG5gDn9kEKT3SJp5vhUjVCk6b_pK9lpR";
+            DriveService CcdDriveSerivce = GoogleDrive.GenDriveService(
+                "164547526172-klarchboe6m5jd908m2p5vmtqtd83v7e.apps.googleusercontent.com", "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");
+
+
+            ShowMessageToFront("[]GoogleDrive-上傳CCD檔案==啟動");
+            //上傳CcdData到GoogleDrive
+            try
+            {
+                // 取得資料夾內所有檔案
+                int iIndex = 1;
+                string[] TotalFiles = Directory.GetFiles(M11Const.Path_FTPQueueCcdResult,"*.*",SearchOption.AllDirectories);
+                foreach (string fname in TotalFiles)
+                {
+                    try
+                    {
+                        FileInfo fi = new FileInfo(fname);
+                        string[] CcdNameSplit = fi.Name.Replace(fi.Extension, "").Split('-');
+
+                        //避免舊檔案格式問題，排除沒有分析完整的檔案名稱
+                        if (CcdNameSplit.Length != 3) continue;
+
+                        string sDataTime = CcdNameSplit[1] + CcdNameSplit[2];
+                        if (CcdNameSplit[1].Length != 8) continue; //日期格式不符合
+                        if (CcdNameSplit[2].Length != 6) continue; //時間格式不符合
+
+                        //從檔案取得資料時間
+                        DateTime dt = Utils.getStringToDateTime(sDataTime);
+
+                        string sLocalPath = fi.FullName;
+
+                        //Check & Create Folder
+                        //年
+                        string sYearID = GoogleDrive.CheckCreateFolder(CcdDriveSerivce, sCCDHistoryParentId, dt.ToString("yyyy"));
+                        //月
+                        string sMonthID = GoogleDrive.CheckCreateFolder(CcdDriveSerivce, sYearID, dt.ToString("MM"));
+                        //日
+                        string sDayID = GoogleDrive.CheckCreateFolder(CcdDriveSerivce, sMonthID, dt.ToString("dd"));
+
+                        //上傳檔案到
+                        GoogleDrive.CreateFile(CcdDriveSerivce, sDayID, sLocalPath);
+
+                        ShowMessageToFront(string.Format("[{0}/{1}]GoogleDrive上傳CCD檔案 成功=={2}", iIndex.ToString(), TotalFiles.Length, fname));
+                        iIndex++;
+
+                        //刪除已處理資料
+                        fi.Delete();
+                    }
+                    catch (Exception ex)
+                    {
+                        //有錯誤持續執行
+                        continue;
+                    }
+                }
+            }
+            finally
+            {
+                
+            }
+
+        }
+
+        /// <summary>
+        /// CCD資料上傳到GoogleDrive使用雲端硬碟軟體(複製到硬碟路徑)
+        /// </summary>
+        private void UploadCcdToGoogleDriveBySyncApp()
+        {
+            //雲端路徑由設定檔設定
+            //string sCcdHistoryPath = @"I:\我的雲端硬碟\Project\M11\Data\ProjectData\Ccd\CcdHistory";
+            string sCcdHistoryPath = ConfigurationManager.AppSettings["PathGoogleDriveCcdHistory"];
+
+            ShowMessageToFront("[]GoogleDrive-上傳CCD檔案==啟動");
+            //上傳CcdData到GoogleDrive
+            try
+            {
+                // 取得資料夾內所有檔案
+                int iIndex = 1;
+                //string[] TotalFiles = Directory.GetFiles(M11Const.Path_FTPQueueCcdResult, "*.*", SearchOption.AllDirectories);
+                string[] TotalFiles = Directory.GetFiles(M11Const.Path_FTPQueueCcdResult);
+                foreach (string fname in TotalFiles)
+                {
+                    try
+                    {
+                        FileInfo fi = new FileInfo(fname);
+                        string[] CcdNameSplit = fi.Name.Replace(fi.Extension, "").Split('-');
+
+                        //避免舊檔案格式問題，排除沒有分析完整的檔案名稱
+                        if (CcdNameSplit.Length != 3) continue;
+
+                        string sDataTime = CcdNameSplit[1] + CcdNameSplit[2];
+                        if (CcdNameSplit[1].Length != 8) continue; //日期格式不符合
+                        if (CcdNameSplit[2].Length != 6) continue; //時間格式不符合
+
+                        //從檔案取得資料時間
+                        DateTime dt = Utils.getStringToDateTime(sDataTime);
+
+                        string sLocalPath = fi.FullName;
+                        string sRemotePath = Path.Combine(sCcdHistoryPath, dt.ToString("yyyy"), dt.ToString("MM"), dt.ToString("dd"));
+                        string sRemoteFullPath = Path.Combine(sRemotePath, fi.Name);
+
+                        //建立檔案路徑
+                        Directory.CreateDirectory(sRemotePath);
+
+                        //複製檔案到路徑中
+                        fi.CopyTo(sRemoteFullPath, true);
+
+                        ShowMessageToFront(string.Format("[{0}/{1}]移動CCD檔案到GoogleDrive資料夾 成功=={2}", iIndex.ToString(), TotalFiles.Length, fname));
+                        iIndex++;
+
+                        //刪除已處理資料
+                        fi.Delete();
+                    }
+                    catch (Exception ex)
+                    {
+                        //有錯誤持續執行
+                        continue;
+                    }
+                }
+            }
+            finally
+            {
+               
+            }
+
         }
 
         /// <summary>
@@ -411,16 +549,22 @@ namespace M11FTP
         /// </summary>
         private void ProcUploadFTP()
         {
-            // CGI資料上傳到FTP
+            //// CGI資料上傳到FTP
             UploadFTPCgi();
 
-            //CGI資料上傳到FTP
+            ////CGI資料上傳到FTP
             UploadFTPXmlResult();
 
-            //CCD資料上傳到FTP
-            UploadCcdToFTP();
+            ////CCD資料上傳到FTP
+            //UploadCcdToFTP();
 
-            //GPS資料上傳到FTP
+            //CCD資料上傳到GoogleDrive(因為自行上傳很慢所以改用雲端硬碟軟體上傳)
+            //UploadCcdToGoogleDrive();
+
+            //CCD資料上傳到GoogleDrive使用雲端硬碟軟體(複製到硬碟路徑)
+            UploadCcdToGoogleDriveBySyncApp();
+
+            ////GPS資料上傳到FTP
             UploadGpsToFTP();
         }
         

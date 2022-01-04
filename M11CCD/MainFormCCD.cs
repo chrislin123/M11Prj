@@ -172,7 +172,8 @@ namespace M11CCD
                     DateTime dtFileName = Utils.getStringToDateTime(sDataTime);
 
                     //判斷是否為5分鐘內產生
-                    if (dtFileName < dtStart || dtFileName > dtEnd) continue; //超過該時段區間
+                    //20210715 東陽說，不用限制時間，盛邦傳上來的就顯示
+                    //if (dtFileName < dtStart || dtFileName > dtEnd) continue; //超過該時段區間
 
                     //比較紀錄最新日期
                     if (dtFileName > VirtualCcd.dtGet)
