@@ -64,7 +64,7 @@ namespace M11FTP
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "M10Winform轉檔錯誤:");                
+                logger.Error(ex, "MainFormFTP轉檔錯誤:");                
             }
             finally
             {
@@ -85,7 +85,8 @@ namespace M11FTP
         /// </summary>
         private void UploadFTPCgi() 
         {
-            List<string> lstFile = new List<string>();
+            //雲端路徑由設定檔設定
+            string sCgiHistoryPath = ConfigurationManager.AppSettings["PathGoogleDriveCgiOriginal"];
 
             ShowMessageToFront("[]FTP-上傳CGI檔案==啟動");
             //上傳CgiData
@@ -99,11 +100,10 @@ namespace M11FTP
 
                 // 取得資料夾內所有檔案
                 int iIndex = 1;
-                foreach (string fname in Directory.GetFiles(M11Const.Path_FTPQueueTxtOriginal))
+                foreach (string fname in Directory.GetFiles(M11Const.Path_FTPQueueTxtOriginal, "*.*", SearchOption.AllDirectories))
                 {
                     try
-                    {
-                        lstFile.Add(fname);
+                    {   
                         //FTP上傳路徑規劃
                         ///M11_System/Data/CgiData/2021/03/21
 
@@ -113,9 +113,23 @@ namespace M11FTP
                         //避免舊檔案格式問題，排除沒有分析完整的檔案名稱
                         if (CgiNameSplit.Length != 8) continue;
 
-
                         //從檔案取得資料時間
                         DateTime dt = DateTime.ParseExact(CgiNameSplit[2] + CgiNameSplit[3] + CgiNameSplit[4] + CgiNameSplit[5] + CgiNameSplit[6] + CgiNameSplit[7], "yyyyMMddHHmmss", System.Globalization.CultureInfo.CurrentCulture);
+
+
+                        //--CGI資料上傳到GoogleDrive使用雲端硬碟軟體(複製到硬碟路徑)
+                        string sStationName = CgiNameSplit[1];                        
+                        string sGoogleRemotePath = Path.Combine(sCgiHistoryPath, sStationName, dt.ToString("yyyy"), dt.ToString("MM"), dt.ToString("dd"));
+                        string sRemoteFullPath = Path.Combine(sGoogleRemotePath, fi.Name);
+
+                        //建立檔案路徑
+                        Directory.CreateDirectory(sGoogleRemotePath);
+
+                        //複製檔案到路徑中
+                        fi.CopyTo(sRemoteFullPath, true);
+
+                        ShowMessageToFront(string.Format("[{0}/{1}]移動CCD檔案到GoogleDrive資料夾 成功=={2}", iIndex.ToString(), "", fname));
+                        //--CGI資料上傳到GoogleDrive使用雲端硬碟軟體(複製到硬碟路徑)
 
                         //FluentFTP 起始路徑都是跟目錄開始，目錄結尾都是/
                         string sLocalPath = fi.FullName;
@@ -151,18 +165,188 @@ namespace M11FTP
                 client.Dispose();
             }
 
-            //全部處理完畢再一次刪除
-            //foreach (string fname in lstFile)
-            //{
-            //    FileInfo fi = new FileInfo(fname);
-
-            //    //存至備份資料夾
-            //    fi.CopyTo(Path.Combine(M11Const.Path_FTPQueueTxtOriginalBak, fi.Name), true);
-                
-            //    //刪除已處理資料
-            //    fi.Delete();
-            //}
         }
+
+        /// <summary>
+        /// CGI資料上傳到GoogleDrive使用雲端硬碟軟體(複製到硬碟路徑)
+        /// </summary>
+        private void UploadCgiToGoogleDriveBySyncApp()
+        {
+            //雲端路徑由設定檔設定
+            string sCgiHistoryPath = ConfigurationManager.AppSettings["PathGoogleDriveCgiOriginal"];
+
+            ShowMessageToFront("[]GoogleDrive-上傳CGI檔案==啟動");
+            //上傳CcdData到GoogleDrive
+            try
+            {
+                // 取得資料夾內所有檔案
+                int iIndex = 1;
+                string[] TotalFiles = Directory.GetFiles(M11Const.Path_FTPQueueTxtOriginal, "*.*", SearchOption.AllDirectories);
+                //string[] TotalFiles = Directory.GetFiles(M11Const.Path_FTPQueueCcdResult);
+                foreach (string fname in TotalFiles)
+                {
+                    try
+                    {
+                        FileInfo fi = new FileInfo(fname);
+                        string[] CgiNameSplit = fi.Name.Replace(fi.Extension, "").Split('-');
+
+                        //避免舊檔案格式問題，排除沒有分析完整的檔案名稱
+                        if (CgiNameSplit.Length != 8) continue;
+
+                        //從檔案取得資料時間
+                        DateTime dt = DateTime.ParseExact(CgiNameSplit[2] + CgiNameSplit[3] + CgiNameSplit[4] + CgiNameSplit[5] + CgiNameSplit[6] + CgiNameSplit[7], "yyyyMMddHHmmss", System.Globalization.CultureInfo.CurrentCulture);
+
+
+                        //--CGI資料上傳到GoogleDrive使用雲端硬碟軟體(複製到硬碟路徑)
+                        string sStationName = CgiNameSplit[1];
+                        string sGoogleRemotePath = Path.Combine(sCgiHistoryPath, sStationName, dt.ToString("yyyy"), dt.ToString("MM"), dt.ToString("dd"));
+                        string sRemoteFullPath = Path.Combine(sGoogleRemotePath, fi.Name);
+
+                        //建立檔案路徑
+                        Directory.CreateDirectory(sGoogleRemotePath);
+
+                        //複製檔案到路徑中
+                        fi.CopyTo(sRemoteFullPath, true);
+
+                        ShowMessageToFront(string.Format("[{0}/{1}]移動CGI檔案到GoogleDrive資料夾 成功=={2}", iIndex.ToString(), TotalFiles.Length, fname));
+                        iIndex++;
+
+                        //刪除已處理資料
+                        fi.Delete();
+                    }
+                    catch (Exception ex)
+                    {
+                        //有錯誤持續執行
+                        continue;
+                    }
+                }
+            }
+            finally
+            {
+
+            }
+
+        }
+
+        /// <summary>
+        ///XmlResult資料上傳到GoogleDrive使用雲端硬碟軟體(複製到硬碟路徑)
+        /// </summary>
+        private void UploadXmlResultToGoogleDriveBySyncApp()
+        {
+            //雲端路徑由設定檔設定
+            string sXmlResultHistoryPath = ConfigurationManager.AppSettings["PathGoogleDriveXmlResult"];
+
+            ShowMessageToFront("[]GoogleDrive-上傳CGI檔案==啟動");
+            //上傳XmlResult到GoogleDrive
+            try
+            {
+                // 取得資料夾內所有檔案
+                int iIndex = 1;
+                string[] TotalFiles = Directory.GetFiles(M11Const.Path_FTPQueueXmlResult, "*.*", SearchOption.AllDirectories);
+                //string[] TotalFiles = Directory.GetFiles(M11Const.Path_FTPQueueCcdResult);
+                foreach (string fname in TotalFiles)
+                {
+                    try
+                    {
+                        //XmlResult檔名範例(202103171410_10min_a_ds_data.xml)
+                        FileInfo fi = new FileInfo(fname);
+                        string[] XmlResultSplit = fi.Name.Replace(fi.Extension, "").Split('_');
+
+                        //從檔案取得資料時間
+                        DateTime dt = DateTime.ParseExact(XmlResultSplit[0], "yyyyMMddHHmm", System.Globalization.CultureInfo.CurrentCulture);
+
+                        //--XmlResult資料上傳到GoogleDrive使用雲端硬碟軟體(複製到硬碟路徑)
+                        string sGoogleRemotePath = Path.Combine(sXmlResultHistoryPath, dt.ToString("yyyy"), dt.ToString("MM"), dt.ToString("dd"));
+                        string sRemoteFullPath = Path.Combine(sGoogleRemotePath, fi.Name);
+
+                        //建立檔案路徑
+                        Directory.CreateDirectory(sGoogleRemotePath);
+
+                        //複製檔案到路徑中
+                        fi.CopyTo(sRemoteFullPath, true);
+
+                        ShowMessageToFront(string.Format("[{0}/{1}]移動CGI檔案到GoogleDrive資料夾 成功=={2}", iIndex.ToString(), TotalFiles.Length, fname));
+                        iIndex++;
+
+                        //刪除已處理資料
+                        fi.Delete();
+                    }
+                    catch (Exception ex)
+                    {
+                        //有錯誤持續執行
+                        continue;
+                    }
+                }
+            }
+            finally
+            {
+
+            }
+
+        }
+
+        /// <summary>
+        /// GPS資料上傳到GoogleDrive使用雲端硬碟軟體(複製到硬碟路徑)
+        /// </summary>
+        private void UploadGPSToGoogleDriveBySyncApp()
+        {
+            //雲端路徑由設定檔設定
+            string sGPSHistoryPath = ConfigurationManager.AppSettings["PathGoogleDriveGPS"];
+
+            ShowMessageToFront("[]GoogleDrive-上傳GPS檔案==啟動");
+            //上傳CcdData到GoogleDrive
+            try
+            {
+                // 取得資料夾內所有檔案
+                int iIndex = 1;
+                string[] TotalFiles = Directory.GetFiles(M11Const.Path_FTPQueueGPSData, "*.*", SearchOption.AllDirectories);
+                
+                foreach (string fname in TotalFiles)
+                {
+                    try
+                    {
+                        FileInfo fi = new FileInfo(fname);
+                        string[] GPSNameSplit = fi.Name.Replace(fi.Extension, "").Split('-');
+
+                        //避免舊檔案格式問題，排除沒有分析完整的檔案名稱
+                        if (GPSNameSplit.Length != 3) continue;
+
+                        string sDataTime = GPSNameSplit[2];
+
+                        //從檔案取得資料時間
+                        DateTime dt = Utils.getStringToDateTime(sDataTime);
+
+                        //--GPS資料上傳到GoogleDrive使用雲端硬碟軟體(複製到硬碟路徑)
+                        string sStationName = GPSNameSplit[0];
+                        string sGoogleRemotePath = Path.Combine(sGPSHistoryPath, sStationName, dt.ToString("yyyy"), dt.ToString("MM"), dt.ToString("dd"));
+                        string sRemoteFullPath = Path.Combine(sGoogleRemotePath, fi.Name);
+
+                        //建立檔案路徑
+                        Directory.CreateDirectory(sGoogleRemotePath);
+
+                        //複製檔案到路徑中
+                        fi.CopyTo(sRemoteFullPath, true);
+
+                        ShowMessageToFront(string.Format("[{0}/{1}]移動GPS檔案到GoogleDrive資料夾 成功=={2}", iIndex.ToString(), TotalFiles.Length, fname));
+                        iIndex++;
+
+                        //刪除已處理資料
+                        fi.Delete();
+                    }
+                    catch (Exception ex)
+                    {
+                        //有錯誤持續執行
+                        continue;
+                    }
+                }
+            }
+            finally
+            {
+
+            }
+
+        }
+
 
         /// <summary>
         /// XML結果資料上傳到FTP
@@ -234,17 +418,6 @@ namespace M11FTP
                 client.Dispose();
             }
             
-
-            ////全部處理完畢再一次刪除
-            //foreach (string fname in lstFile)
-            //{
-            //    FileInfo fi = new FileInfo(fname);
-                
-            //    //存至備份資料夾
-            //    fi.CopyTo(Path.Combine(M11Const.Path_FTPQueueXmlResultBak, fi.Name), true);
-            //    //刪除已處理資料
-            //    fi.Delete();
-            //}
         }
 
         /// <summary>
@@ -315,18 +488,6 @@ namespace M11FTP
                 client.Disconnect();
                 client.Dispose();
             }
-
-            //全部處理完畢再一次刪除
-            //foreach (string fname in lstFile)
-            //{
-            //    FileInfo fi = new FileInfo(fname);
-
-            //    //存至備份資料夾
-            //    fi.CopyTo(Path.Combine(M11Const.Path_FTPQueueTxtOriginalBak, fi.Name), true);
-
-            //    //刪除已處理資料
-            //    fi.Delete();
-            //}
         }        
 
         /// <summary>
@@ -412,8 +573,8 @@ namespace M11FTP
             {
                 // 取得資料夾內所有檔案
                 int iIndex = 1;
-                //string[] TotalFiles = Directory.GetFiles(M11Const.Path_FTPQueueCcdResult, "*.*", SearchOption.AllDirectories);
-                string[] TotalFiles = Directory.GetFiles(M11Const.Path_FTPQueueCcdResult);
+                string[] TotalFiles = Directory.GetFiles(M11Const.Path_FTPQueueCcdResult, "*.*", SearchOption.AllDirectories);
+                //string[] TotalFiles = Directory.GetFiles(M11Const.Path_FTPQueueCcdResult);
                 foreach (string fname in TotalFiles)
                 {
                     try
@@ -424,6 +585,7 @@ namespace M11FTP
                         //避免舊檔案格式問題，排除沒有分析完整的檔案名稱
                         if (CcdNameSplit.Length != 3) continue;
 
+                        string sStationName = CcdNameSplit[0];
                         string sDataTime = CcdNameSplit[1] + CcdNameSplit[2];
                         if (CcdNameSplit[1].Length != 8) continue; //日期格式不符合
                         if (CcdNameSplit[2].Length != 6) continue; //時間格式不符合
@@ -432,7 +594,7 @@ namespace M11FTP
                         DateTime dt = Utils.getStringToDateTime(sDataTime);
 
                         string sLocalPath = fi.FullName;
-                        string sRemotePath = Path.Combine(sCcdHistoryPath, dt.ToString("yyyy"), dt.ToString("MM"), dt.ToString("dd"));
+                        string sRemotePath = Path.Combine(sCcdHistoryPath, sStationName, dt.ToString("yyyy"), dt.ToString("MM"), dt.ToString("dd"));
                         string sRemoteFullPath = Path.Combine(sRemotePath, fi.Name);
 
                         //建立檔案路徑
@@ -549,23 +711,40 @@ namespace M11FTP
         /// </summary>
         private void ProcUploadFTP()
         {
-            //// CGI資料上傳到FTP
-            UploadFTPCgi();
 
-            ////CGI資料上傳到FTP
-            UploadFTPXmlResult();
+            //---CGI---
+            //20220106 暫停
+            // CGI資料上傳到FTP
+            //UploadFTPCgi();
 
+            //CGI資料上傳到GoogleDrive使用雲端硬碟軟體(複製到硬碟路徑)
+            UploadCgiToGoogleDriveBySyncApp();
+
+            //---XmlResult---
+            //XmlResult資料上傳到FTP
+            //UploadFTPXmlResult();
+
+            //XmlResult資料上傳到GoogleDrive使用雲端硬碟軟體(複製到硬碟路徑)
+            UploadXmlResultToGoogleDriveBySyncApp();
+
+            //---CCD---
+            //20220104 暫停
             ////CCD資料上傳到FTP
             //UploadCcdToFTP();
 
+            //20220104 暫停
             //CCD資料上傳到GoogleDrive(因為自行上傳很慢所以改用雲端硬碟軟體上傳)
             //UploadCcdToGoogleDrive();
 
             //CCD資料上傳到GoogleDrive使用雲端硬碟軟體(複製到硬碟路徑)
             UploadCcdToGoogleDriveBySyncApp();
 
-            ////GPS資料上傳到FTP
-            UploadGpsToFTP();
+            //---GPS---
+            //GPS資料上傳到FTP
+            //UploadGpsToFTP();
+
+            //GPS資料上傳到GoogleDrive使用雲端硬碟軟體(複製到硬碟路徑)
+            UploadGPSToGoogleDriveBySyncApp();
         }
         
     }
