@@ -1644,7 +1644,16 @@ namespace M11XML
                         doc.Save(Path.Combine(M11Const.Path_XmlResultWeb, "10min_a_ds_data.xml"));
 
                         //儲存到網頁發布路徑-7天歷史資料區
-                        doc.Save(Path.Combine(M11Const.Path_XmlResultWeb7Day, string.Format("{0}_{1}", dtCheck.ToString("yyyyMMddHHmm"), "10min_a_ds_data.xml")));
+                        //doc.Save(Path.Combine(M11Const.Path_XmlResultWeb7Day, string.Format("{0}_{1}", dtCheck.ToString("yyyyMMddHHmm"), "10min_a_ds_data.xml")));
+                        // 20220210 調整網站歷史資料區存放路徑
+                        /*
+                         按照目錄規範存放：/yyyy/mmdd/，需經/符號區隔
+                         */
+                        //1.建立路徑
+                        string Web7DaySavePath = Path.Combine(M11Const.Path_XmlResultWeb7Day, dtCheck.ToString("yyyy"), dtCheck.ToString("MMdd"));
+                        Directory.CreateDirectory(Web7DaySavePath);
+                        //2.存放資料
+                        doc.Save(Path.Combine(Web7DaySavePath, string.Format("{0}_{1}", dtCheck.ToString("HHmm"), "10min_a_ds_data.xml")));
 
                         //儲存到準備FTP上傳路徑
                         doc.Save(Path.Combine(M11Const.Path_FTPQueueXmlResult, string.Format("{0}_{1}", dtCheck.ToString("yyyyMMddHHmm"), "10min_a_ds_data.xml")));
@@ -1812,12 +1821,22 @@ namespace M11XML
                 //預計排程每分鐘執行一次，排除非剛好10分鐘的執行(00,10,20,30,40,50)
                 if (dtCheck.Minute.ToString().PadLeft(2, '0').Substring(1, 1) != "0") return;
 
-                //移除超過四天的資料
+                //移除超過四天的非雨量資料
                 dtCheck = dtCheck.AddDays(-4);
                 string sDatetimeString = M11DatetimeToString(dtCheck);
 
                 ssql = @"
-                    delete CgiStationData where DatetimeString < '{0}'
+                    delete CgiStationData where DatetimeString < '{0}' and datatype != 'RAIN'
+                ";
+                ssql = string.Format(ssql, sDatetimeString);
+                dbDapper.Execute(ssql);
+
+                //移除超過31天的雨量資料(111年度雨量累積計算要30日)
+                dtCheck = dtCheck.AddDays(-31);
+                sDatetimeString = M11DatetimeToString(dtCheck);
+
+                ssql = @"
+                    delete CgiStationData where DatetimeString < '{0}' and datatype = 'RAIN'
                 ";
                 ssql = string.Format(ssql, sDatetimeString);
                 dbDapper.Execute(ssql);

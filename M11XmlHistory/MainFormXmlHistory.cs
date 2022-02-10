@@ -77,7 +77,7 @@ namespace M11XmlHistory
 
 
         /// <summary>
-        /// M11資料補遺(XML、資料庫)
+        /// M11資料補遺(前十天資料)(XML、資料庫)
         /// </summary>
         private void M11AddendumXML() 
         {
