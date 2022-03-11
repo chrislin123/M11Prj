@@ -12,6 +12,7 @@ using System.IO.Compression;
 using M10.lib;
 using M11System;
 using M11System.Model.M11;
+using System.Xml;
 
 namespace M11XmlHistory
 {
@@ -99,11 +100,10 @@ namespace M11XmlHistory
                 {
                     //dtCheck = Utils.getStringToDateTime(dtCheck.ToString("2020-06-06 08:50:00"));
 
-                    //測試XML補遺
                     M11AddendumXMLByTime(i);
-                    
                 }
                 ShowMessageToFront("M11資料補遺(XML、資料庫)==結束");
+
             }
             catch (Exception ex)
             {
@@ -229,9 +229,9 @@ namespace M11XmlHistory
 
 
         /// <summary>
-        /// CGI資料移動到備份資料夾(傳入的FileInfo檔案不刪除)
+        /// M11資料補遺(XML、資料庫)
         /// </summary>
-        /// <param name="fi"></param>
+        /// <param name="dtCheck"></param>
         public void M11AddendumXMLByTime(DateTime dtCheck)
         {
 
@@ -291,41 +291,23 @@ namespace M11XmlHistory
 
 
             //判斷檔案時刻是否有資料
+            string Web7DaySavePath = Path.Combine(M11Const.Path_XmlResultWeb7Day, dtCheck.ToString("yyyy"), dtCheck.ToString("MMdd"));
+            Directory.CreateDirectory(Web7DaySavePath);
+            string sFullFilePath = Path.Combine(Web7DaySavePath, string.Format("{0}_{1}", dtCheck.ToString("HHmm"), "10min_a_ds_data.xml"));
+            if (File.Exists(sFullFilePath) == false)
+            {
+                //1.資料庫取資料產生XML
+                XmlDocument XmlDoc = M11Helper.ProcGenResultXMLFromDB(dtCheck);
 
+                //2.儲存到網頁歷史區
+                XmlDoc.Save(sFullFilePath);
 
+                //儲存到準備FTP上傳路徑
+                XmlDoc.Save(Path.Combine(M11Const.Path_FTPQueueXmlResult, string.Format("{0}_{1}", dtCheck.ToString("yyyyMMddHHmm"), "10min_a_ds_data.xml")));
 
-            //取得檔案前一時刻的資料
-
-
-
-
-
-
-
-
-
-            //string[] CgiNameSplit = fi.Name.Replace(fi.Extension, "").Split('-');
-
-            ////避免舊檔案格式問題，排除沒有分析完整的檔案名稱
-            //if (CgiNameSplit.Length != 8)
-            //{
-            //    return;
-            //}
-
-            ////從檔案取得資料時間
-            //DateTime dt = DateTime.ParseExact(CgiNameSplit[2] + CgiNameSplit[3] + CgiNameSplit[4] + CgiNameSplit[5] + CgiNameSplit[6] + CgiNameSplit[7], "yyyyMMddHHmmss", System.Globalization.CultureInfo.CurrentCulture);
-
-            ////建立資料夾
-            ////string sFolderYear = dt.ToString("yyyy");
-            ////string sFolderMonth = dt.ToString("yyyyMM");
-            //string sFolderDay = dt.ToString("yyyyMMdd");
-
-            ////string sBackupFolder = Path.Combine(M11Const.Path_BackupCGIData, sFolderYear, sFolderMonth, sFolderDay);
-            //string sBackupFolder = Path.Combine(M11Const.Path_BackupCGIData, sFolderDay);
-            //Directory.CreateDirectory(sBackupFolder);
-
-            ////存至備份資料夾
-            //fi.CopyTo(Path.Combine(sBackupFolder, fi.Name), true);
+                //儲存到歷史路徑
+                XmlDoc.Save(Path.Combine(M11Const.Path_FTPQueueXmlResult7Day, string.Format("{0}_{1}", dtCheck.ToString("yyyyMMddHHmm"), "10min_a_ds_data.xml")));
+            }
 
 
         }

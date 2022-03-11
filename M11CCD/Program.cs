@@ -16,12 +16,12 @@ namespace M11CCD
         static void Main()
         {
 
-            Random r = new Random();
-            var items = Enumerable.Range(0, 100).Select(x => r.Next(100, 200)).ToList();
+            //Random r = new Random();
+            //var items = Enumerable.Range(0, 100).Select(x => r.Next(100, 200)).ToList();
 
-            ParallelQueue(items, DoWork);
+            //ParallelQueue(items, DoWork);
 
-            return;
+            //return;
 
 
             Application.EnableVisualStyles();

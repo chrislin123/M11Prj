@@ -116,6 +116,11 @@ namespace M11System
         public static string SensorDataType_PM = "PM";
         public static string SensorDataType_GPS = "GPS";
 
+        //資料表代碼==BasM11Setting.DataType
+        public static string BasM11SettingDataType_SensorObs_num = "SensorObs_num";
+
+
+
 
     }
 }

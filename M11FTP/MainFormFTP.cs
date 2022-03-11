@@ -47,37 +47,37 @@ namespace M11FTP
             Directory.CreateDirectory(M11Const.Path_FTPQueueCcdResult);
 
 
-            //string[] TotalFiles = Directory.GetFiles(@"I:\我的雲端硬碟\Project\M11\Data\ProjectData\Ccd\CcdHistory\DS144\2021\12\01");
-            string[] TotalFiles = Directory.GetFiles(@"I:\我的雲端硬碟\Project\M11\temp1");
+            ////string[] TotalFiles = Directory.GetFiles(@"I:\我的雲端硬碟\Project\M11\Data\ProjectData\Ccd\CcdHistory\DS144\2021\12\01");
+            //string[] TotalFiles = Directory.GetFiles(@"I:\我的雲端硬碟\Project\M11\temp1");
 
             
-            foreach (string fname in TotalFiles)
-            {
-                try
-                {
-                    FileInfo fi = new FileInfo(fname);
+            //foreach (string fname in TotalFiles)
+            //{
+            //    try
+            //    {
+            //        FileInfo fi = new FileInfo(fname);
                    
 
-                    ////--CGI資料上傳到GoogleDrive使用雲端硬碟軟體(複製到硬碟路徑)
-                    //string sStationName = CgiNameSplit[1];
-                    string sGoogleRemotePath = @"c:\temp1";
-                    string sRemoteFullPath = Path.Combine(sGoogleRemotePath, fi.Name);
+            //        ////--CGI資料上傳到GoogleDrive使用雲端硬碟軟體(複製到硬碟路徑)
+            //        //string sStationName = CgiNameSplit[1];
+            //        string sGoogleRemotePath = @"c:\temp1";
+            //        string sRemoteFullPath = Path.Combine(sGoogleRemotePath, fi.Name);
 
-                    //建立檔案路徑
-                    Directory.CreateDirectory(sGoogleRemotePath);
+            //        //建立檔案路徑
+            //        Directory.CreateDirectory(sGoogleRemotePath);
 
-                    //複製檔案到路徑中
-                    //fi.CopyTo(sRemoteFullPath, true);
+            //        //複製檔案到路徑中
+            //        //fi.CopyTo(sRemoteFullPath, true);
 
-                    fi.Delete();
+            //        fi.Delete();
 
-                }
-                catch (Exception ex)
-                {
-                    //有錯誤持續執行
-                    continue;
-                }
-            }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        //有錯誤持續執行
+            //        continue;
+            //    }
+            //}
 
 
             timer1.Enabled = true;
