@@ -77,7 +77,11 @@ namespace M11XML
                 ShowMessageToFront("轉檔啟動");
 
                 DateTime dtCheck = DateTime.Now;
-               
+
+                //20220516 氣象局產生資料優先產生，往前挪到水保局XML之前處理
+                //雨量站回傳氣象局-產生結果XML(每十分鐘)
+                ProcGenRainfallXML(dtCheck);
+
                 //讀取CGI原始資料轉檔到DB資料庫
                 ReadDataToXMLDB();
 
@@ -90,10 +94,7 @@ namespace M11XML
                 //產生結果XML(每十分鐘)
                 //ProcGenResultXML(dtCheck,"Normal");
                 //20220311 切割產生資料及XML做法
-                ProcGenResultXML_V2(dtCheck);
-
-                //雨量站回傳氣象局-產生結果XML(每十分鐘)
-                ProcGenRainfallXML(dtCheck);
+                ProcGenResultXML_V2(dtCheck);                
 
                 //移除CGI資料超過四天的資料(每十分鐘)
                 ProcRemoveCgiDb(dtCheck);
@@ -577,8 +578,8 @@ namespace M11XML
 
             if (lstData.Count == 0 )
             {
-                sResult = string.Format("{0} {1} {2} {3} {4} {5} {6} {7}"
-                , 0, 0, 0, 0, 0, 0, 0, 0);
+                sResult = string.Format("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9}"
+                , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
                 sCgiData = "0";
                 return sResult;
             }
@@ -669,6 +670,8 @@ namespace M11XML
             string sRain24h = "0";
             string sRain48h = "0";
             string sRain72h = "0";
+            string sRain7D = "0";
+            string sRain30D = "0";
             double dRain10m = 0;
             double dRain1h = 0;
             double dRain3h = 0;
@@ -677,11 +680,16 @@ namespace M11XML
             double dRain24h = 0;
             double dRain48h = 0;
             double dRain72h = 0;
+            double dRain7D = 0;
+            double dRain30D= 0;
 
             //計數值的單位(累積)
             //double dValueUnit = 5;
             // 20210420 計數單位5改為0.5
-            double dValueUnit = 0.5;
+            //double dValueUnit = 0.5;
+            // 20220525 改由BasStationSensor設定檔設定
+            double dValueUnit = 0.5; //預設0.5
+            double.TryParse(SensorRow.DefaultWater, out dValueUnit);
 
             //新計算方式，要跟前面的資料比對，才知道有沒有累積
 
@@ -729,6 +737,16 @@ namespace M11XML
             dRain72h = lstGwRainData.Where(c => c.dtDatetime >= dtPreTemp && c.dtDatetime <= dtCheck).Sum(x => x.dAccumulation);
             dRain72h = dRain72h * dValueUnit;
 
+            //7D
+            dtPreTemp = dtCheck.AddHours(-168).AddMinutes(10);
+            dRain7D = lstGwRainData.Where(c => c.dtDatetime >= dtPreTemp && c.dtDatetime <= dtCheck).Sum(x => x.dAccumulation);
+            dRain7D = dRain7D * dValueUnit;
+
+            //30D
+            dtPreTemp = dtCheck.AddHours(-720).AddMinutes(10);
+            dRain30D = lstGwRainData.Where(c => c.dtDatetime >= dtPreTemp && c.dtDatetime <= dtCheck).Sum(x => x.dAccumulation);
+            dRain30D = dRain30D * dValueUnit;
+
             //四捨五入小數點1位
             dRain10m = Math.Round(dRain10m, 1);
             dRain1h = Math.Round(dRain1h, 1);
@@ -738,6 +756,8 @@ namespace M11XML
             dRain24h = Math.Round(dRain24h, 1);
             dRain48h = Math.Round(dRain48h, 1);
             dRain72h = Math.Round(dRain72h, 1);
+            dRain7D = Math.Round(dRain7D, 1);
+            dRain30D = Math.Round(dRain30D, 1);
 
             sRain10m = dRain10m.ToString();
             sRain1h = dRain1h.ToString();
@@ -747,9 +767,11 @@ namespace M11XML
             sRain24h = dRain24h.ToString();
             sRain48h = dRain48h.ToString();
             sRain72h = dRain72h.ToString();
+            sRain7D = dRain7D.ToString();
+            sRain30D = dRain30D.ToString();
 
-            sResult = string.Format("{0} {1} {2} {3} {4} {5} {6} {7}"
-                , sRain10m, sRain1h, sRain3h, sRain6h, sRain12h, sRain24h, sRain48h, sRain72h);
+            sResult = string.Format("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9}"
+                , sRain10m, sRain1h, sRain3h, sRain6h, sRain12h, sRain24h, sRain48h, sRain72h, sRain7D, sRain30D);
 
             return sResult;
         }
