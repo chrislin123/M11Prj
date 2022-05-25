@@ -44,26 +44,35 @@ namespace M11XML
 
             DateTime dtCheck = new DateTime(2022, 3, 10, 10, 30, 8);
 
-            //string sResult = "";
-            //List<BasM11Setting> oList = M11Helper.GetBasM11Setting(M11Const.BasM11SettingDataType_SensorObs_num);
-            //sResult = oList.Where(x => x.DataItem == "TM3").Select(x => x.DataValue).FirstOrDefault();
-            //sResult = oList.Where(x => x.DataItem == "TM3").Select(x => x.DataValue).DefaultIfEmpty<string>("").First(); ;
-            
+            //string sPath = @"D:\Temp\pmhist\";
+            //string[] aFiles = Directory.GetFiles(sPath);
+            //// 取得資料夾內所有檔案
+            //foreach (string fname in aFiles)
+            //{
+            //    FileInfo fi = new FileInfo(fname);
 
-            //sResult = "";
+            //    string[] pfname = fi.Name.Split('_');
+                
 
-            //ReadOutDataToDB(dtCheck);
+            //    dtCheck = Utils.getStringToDateTime(pfname[0]+"00");
 
-            //ProcPreGetNextDataFromPreData();
+            //    //1.建立路徑
+            //    string Web7DaySavePath = Path.Combine(sPath, dtCheck.ToString("yyyy"), dtCheck.ToString("MMdd"));
+            //    Directory.CreateDirectory(Web7DaySavePath);
+            //    //2.存放資料
+            //    //doc.Save(Path.Combine(Web7DaySavePath, string.Format("{0}_{1}", dtCheck.ToString("HHmm"), "PrecipitationToday.xml")));
 
-            //ReadGPSDataToDB();
+                
+            //    string sFTPQueueSaveFileFullName = Path.Combine(Web7DaySavePath, string.Format("{0}_{1}", dtCheck.ToString("HHmm"), "PrecipitationToday.xml"));
+            //    File.Delete(sFTPQueueSaveFileFullName);
+            //    fi.MoveTo(sFTPQueueSaveFileFullName);
+            //    //fi.CopyTo(sFTPQueueSaveFileFullName, true);
 
-            //ProcGenResultXML(dtCheck);
+               
+            //}
 
-
-            //XmlDocument dddd = M11Helper.ProcGenResultXMLFromDB(dtCheck);
-
-            //dddd.Save(Path.Combine(M11Const.Path_FTPQueueXmlResult7Day, string.Format("{0}_{1}", dtCheck.ToString("yyyyMMddHHmm"), "10min_a_ds_data.xml")));
+            //MessageBox.Show("完成");
+            //return;
 
             timer1.Enabled = true;
         }
@@ -1953,7 +1962,7 @@ namespace M11XML
 
                     //儲存到網頁發布路徑-7天歷史資料區
                     //doc.Save(Path.Combine(M11Const.Path_XmlResultWeb7Day, string.Format("{0}_{1}", dtCheck.ToString("yyyyMMddHHmm"), "10min_a_ds_data.xml")));
-                    // 20220210 調整網站歷史資料區存放路徑
+                    // 20220210 調整網站歷史資料區存放路徑(有提醒東暘修改後檔名不可逆)
                     /*
                      按照目錄規範存放：/yyyy/mmdd/，需經/符號區隔
                      */
@@ -2220,7 +2229,17 @@ namespace M11XML
                         doc.Save(Path.Combine(M11Const.Path_XmlResultWeb, "PrecipitationToday.xml"));
 
                         //儲存到網頁發布路徑-7天歷史資料區
-                        doc.Save(Path.Combine(M11Const.Path_PrecipitationWeb7Day, string.Format("{0}_{1}", dtCheck.ToString("yyyyMMddHHmm"), "PrecipitationToday.xml")));
+                        //doc.Save(Path.Combine(M11Const.Path_PrecipitationWeb7Day, string.Format("{0}_{1}", dtCheck.ToString("yyyyMMddHHmm"), "PrecipitationToday.xml")));
+
+                        // 20220525 調整網站歷史資料區存放路徑(有提醒東暘修改後檔名不可逆)
+                        /*
+                         按照目錄規範存放：/yyyy/mmdd/，需經/符號區隔
+                         */
+                        //1.建立路徑
+                        string Web7DaySavePath = Path.Combine(M11Const.Path_PrecipitationWeb7Day, dtCheck.ToString("yyyy"), dtCheck.ToString("MMdd"));
+                        Directory.CreateDirectory(Web7DaySavePath);
+                        //2.存放資料
+                        doc.Save(Path.Combine(Web7DaySavePath, string.Format("{0}_{1}", dtCheck.ToString("HHmm"), "PrecipitationToday.xml")));
 
                         //儲存到準備FTP上傳路徑
                         doc.Save(Path.Combine(M11Const.Path_FTPQueueXmlResult, string.Format("{0}_{1}", dtCheck.ToString("yyyyMMddHHmm"), "PrecipitationToday.xml")));
