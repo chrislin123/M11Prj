@@ -2170,18 +2170,46 @@ namespace M11XML
                                 sSensorName  = aTmp[1];
                             }
 
-                            double dRainfall = 0.0;                            
+                            double dRainfall = 0.0;
+                            // 20220525 改由BasStationSensor設定檔設定
+                            double dValueUnit = 0.5; //預設0.5
                             ssql = @"
-                                            select * from Result10MinData
-                                            where StationID = '{0}' and SensorID = '{1}' and DatetimeString = '{2}'
-                                        ";
-                            ssql = string.Format(ssql, sStationName, sSensorName, dtCheck.ToString("yyyy-MM-dd HH:mm:00"));
-                            Result10MinData rmd = dbDapper.QuerySingleOrDefault<Result10MinData>(ssql);
+                                select * from BasStationSensor 
+                                where Station = '{0}' and Sensor = 'RG'
+                            ";
+                            ssql = string.Format(ssql, sStationName);
+
+                            BasStationSensor bss = dbDapper.QuerySingleOrDefault<BasStationSensor>(ssql);
+                            if (bss != null)
+                            {   
+                                double.TryParse(bss.DefaultWater, out dValueUnit);
+                            }
+
+                            // 20220525 因為氣象局要優先跑批次內容快速更新，所以直接改抓Cgi的資料
+                            //ssql = @"
+                            //                select * from Result10MinData
+                            //                where StationID = '{0}' and SensorID = '{1}' and DatetimeString = '{2}'
+                            //            ";
+                            //ssql = string.Format(ssql, sStationName, sSensorName, dtCheck.ToString("yyyy-MM-dd HH:mm:00"));
+                            //Result10MinData rmd = dbDapper.QuerySingleOrDefault<Result10MinData>(ssql);
+                            //if (rmd != null)
+                            //{
+                            //    double.TryParse(rmd.CgiData, out dRainfall);
+                            //}
+                            ssql = @"
+                                select * from CgiStationData 
+                                where Station = '{0}' and datatype = 'RAIN' and DatetimeString = '{1}'                                                    
+                            ";
+                            ssql = string.Format(ssql, sStationName, dtCheck.ToString("yyyy-MM-dd HH:mm:00"));
+
+                            CgiStationData rmd = dbDapper.QuerySingleOrDefault<CgiStationData>(ssql);
                             if (rmd != null)
                             {
-                                double.TryParse(rmd.CgiData, out dRainfall);
+                                double.TryParse(rmd.Value, out dRainfall);
                             }
-                            dRainfall = dRainfall * 0.5;
+
+                            //  
+                            dRainfall = dRainfall * dValueUnit;
 
                             // 20210426 雨量站維護期間，使用網頁設定不啟用。並將雨量值改變-98表示維護中。
                             if (item.Active_YN == "N")
