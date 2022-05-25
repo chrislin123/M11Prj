@@ -205,6 +205,8 @@ namespace M11MVC.Controllers
             head.Add("[RG]24小時累積雨量(mm)");
             head.Add("[RG]48小時累積雨量(mm)");
             head.Add("[RG]72小時累積雨量(mm)");
+            head.Add("[RG]7日累積雨量(mm)");
+            head.Add("[RG]30日累積雨量(mm)");
             //TM
             head.Add("[TM]方位一觀測值(秒)");
             head.Add("[TM]方位二觀測值(秒)");
@@ -250,10 +252,10 @@ namespace M11MVC.Controllers
                 //cols.Add(item.SensorID);
                 cols.Add(item.DatetimeString);
                 //cols.Add(item.observation_num);
-                
+
                 //[RG]數據拆開各自一個欄位
-                List<string> lstTmp = new List<string>();                
-                for (int i = 0; i < 8; i++)
+                List<string> lstTmp = new List<string>();
+                for (int i = 0; i < 10; i++)
                 {
                     lstTmp.Add("");
                 }
@@ -265,7 +267,7 @@ namespace M11MVC.Controllers
                         lstTmp[i] = aValue[i];
                     }
                 }
-                         
+
                 foreach (string value in lstTmp)
                 {
                     cols.Add(value);
