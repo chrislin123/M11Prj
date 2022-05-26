@@ -42,7 +42,13 @@ namespace M11XML
             Directory.CreateDirectory(M11Const.Path_FTPQueueGPSData);
 
 
-            DateTime dtCheck = new DateTime(2022, 3, 10, 10, 30, 8);
+            DateTime dtCheck = new DateTime(2022, 3, 10, 0, 0, 8);
+
+            //if (dtCheck.Hour == 0 && dtCheck.Minute == 0)
+            //{
+            //    DateTime dtPreTime = dtCheck.AddMinutes(-10);
+               
+            //}
 
             //string sPath = @"D:\Temp\pmhist\";
             //string[] aFiles = Directory.GetFiles(sPath);
@@ -52,7 +58,7 @@ namespace M11XML
             //    FileInfo fi = new FileInfo(fname);
 
             //    string[] pfname = fi.Name.Split('_');
-                
+
 
             //    dtCheck = Utils.getStringToDateTime(pfname[0]+"00");
 
@@ -62,13 +68,13 @@ namespace M11XML
             //    //2.存放資料
             //    //doc.Save(Path.Combine(Web7DaySavePath, string.Format("{0}_{1}", dtCheck.ToString("HHmm"), "PrecipitationToday.xml")));
 
-                
+
             //    string sFTPQueueSaveFileFullName = Path.Combine(Web7DaySavePath, string.Format("{0}_{1}", dtCheck.ToString("HHmm"), "PrecipitationToday.xml"));
             //    File.Delete(sFTPQueueSaveFileFullName);
             //    fi.MoveTo(sFTPQueueSaveFileFullName);
             //    //fi.CopyTo(sFTPQueueSaveFileFullName, true);
 
-               
+
             //}
 
             //MessageBox.Show("完成");
@@ -2206,6 +2212,23 @@ namespace M11XML
                             if (rmd != null)
                             {
                                 double.TryParse(rmd.Value, out dRainfall);
+                            }
+
+                            // 202205226 氣象局XML特殊處理-注意每日00:00為前一日之最大值，00:10更新從0開始
+                            if (dtCheck.Hour == 0 && dtCheck.Minute == 0)
+                            {
+                                DateTime dtPreTime = dtCheck.AddMinutes(-10);
+                                ssql = @"
+                                select * from CgiStationData 
+                                    where Station = '{0}' and datatype = 'RAIN' and DatetimeString = '{1}'                                                    
+                                ";
+                                ssql = string.Format(ssql, sStationName, dtPreTime.ToString("yyyy-MM-dd HH:mm:00"));
+
+                                CgiStationData csd = dbDapper.QuerySingleOrDefault<CgiStationData>(ssql);
+                                if (csd != null)
+                                {
+                                    double.TryParse(csd.Value, out dRainfall);
+                                }
                             }
 
                             //  
