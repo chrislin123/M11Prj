@@ -93,15 +93,18 @@ namespace M11XML
 
                 DateTime dtCheck = DateTime.Now;
 
+                //測試
+                dtCheck = new DateTime(2022, 9, 26, 5, 0, 8);
+
                 //20220516 氣象局產生資料優先產生，往前挪到水保局XML之前處理
                 //雨量站回傳氣象局-產生結果XML(每十分鐘)
                 ProcGenRainfallXML(dtCheck);
 
                 //讀取CGI原始資料轉檔到DB資料庫
-                ReadDataToXMLDB();
+                ReadDataToXMLDB(dtCheck);
 
-                //讀取GPS原始資料轉檔到DB資料庫
-                ReadGPSDataToDB();
+                //讀取GPS原始資料轉檔到DB資料庫-成大千磯GPS-郭博士
+                ReadGPSDataToDB(dtCheck);
 
                 //讀取委外資料轉檔到DB資料庫
                 ReadOutDataToDB(dtCheck);
@@ -2401,12 +2404,12 @@ namespace M11XML
         /// <summary>
         /// 讀取GPS原始資料轉檔到DB資料庫
         /// </summary>
-        private void ReadGPSDataToDB()
+        private void ReadGPSDataToDB(DateTime dtCheck)
         {
             try
             {
                 //現在的時間預先補上個時段的資料到下一個時段的資料
-                ProcPreGetNextDataFromPreData();
+                ProcPreGetNextDataFromPreData(dtCheck);
 
                 //==========================================================================================================================
 
@@ -2451,12 +2454,12 @@ namespace M11XML
         /// <summary>
         /// 讀取原始資料轉檔到DB資料庫
         /// </summary>
-        private void ReadDataToXMLDB()
+        private void ReadDataToXMLDB(DateTime dtCheck)
         {
             try
             {
                 //現在的時間預先補上個時段的資料到下一個時段的資料
-                ProcPreGetNextDataFromPreData();
+                ProcPreGetNextDataFromPreData(dtCheck);
 
                 //==========================================================================================================================
 
@@ -2571,7 +2574,6 @@ namespace M11XML
                         }
                     }
 
-
                 }
             }
             catch (Exception)
@@ -2581,6 +2583,11 @@ namespace M11XML
             }
         }
 
+        /// <summary>
+        /// 解析GPS檔案中的資料
+        /// </summary>
+        /// <param name="FileName"></param>
+        /// <returns></returns>
         private string TransGPSData(string FileName)
         {
             //Dictionary<string, string> di = new Dictionary<string, string>();
@@ -2626,6 +2633,24 @@ namespace M11XML
                             );
                         //di.Add("GPS", sGpsData);
 
+                    }
+
+                    //20230329 東暘，水保局調整GNSS資料接收項目，新增四個欄位
+                    if (GpsDatas.Length == 12)
+                    {
+                        //轉成GPS資料格式(新版共11個欄位)
+                        sResult = string.Format("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9}"
+                            , GpsDatas[2]
+                            , GpsDatas[3]
+                            , GpsDatas[4]
+                            , GpsDatas[5]
+                            , GpsDatas[6]
+                            , GpsDatas[7]
+                            , GpsDatas[8]
+                            , GpsDatas[9]
+                            , GpsDatas[10]
+                            , GpsDatas[11]
+                            );
                     }
 
                 }
@@ -2810,15 +2835,15 @@ namespace M11XML
         /// 現在的時間預先補上個時段的資料到下一個時段的資料
         /// </summary>
         /// <param name="fname"></param>
-        private void ProcPreGetNextDataFromPreData()
+        private void ProcPreGetNextDataFromPreData(DateTime dtCheck)
         {
             //取得現在時間
             DateTime dt = DateTime.Now;
 
-            //取得下一個時段的時間
-            dt = TransDatetimeToNextFullDatetime(dt);
+            //取得這個時段的時間
+            dt = TransDatetimeToNextFullDatetime(dtCheck);
 
-            //下個時段時間字串
+            //這個時段時間字串
             string sNextDatetimeString = M11DatetimeToString(dt);
             //上個時段時間字串
             string sPreDatetimeString = M11DatetimeToString(dt.AddMinutes(-10));
@@ -2831,7 +2856,7 @@ namespace M11XML
             ssql = string.Format(ssql, sPreDatetimeString);
             List<CgiStationData> lstPreData = dbDapper.Query<CgiStationData>(ssql);
 
-            //取得下個時段資料庫資料
+            //取得這個時段資料庫資料
             ssql = @"
                     select * from CgiStationData where DatetimeString = '{0}'                                                            
                     ";
