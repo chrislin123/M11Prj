@@ -42,7 +42,7 @@ namespace M11XML
             Directory.CreateDirectory(M11Const.Path_FTPQueueGPSData);
 
 
-            DateTime dtCheck = new DateTime(2022, 3, 10, 0, 0, 8);
+            //DateTime dtCheck = new DateTime(2022, 3, 10, 0, 0, 8);
 
             //if (dtCheck.Hour == 0 && dtCheck.Minute == 0)
             //{
@@ -94,7 +94,7 @@ namespace M11XML
                 DateTime dtCheck = DateTime.Now;
 
                 //測試
-                dtCheck = new DateTime(2022, 9, 26, 5, 0, 8);
+                //dtCheck = new DateTime(2023, 3, 29, 22 ,40, 8);
 
                 //20220516 氣象局產生資料優先產生，往前挪到水保局XML之前處理
                 //雨量站回傳氣象局-產生結果XML(每十分鐘)
@@ -1492,6 +1492,12 @@ namespace M11XML
             dE = dSY * 3600;
             dF = dD - 0;
             dG = dE - 0;
+            //20230331 前一天資料不定期會有取不到的問題，導致dD_before跟dE_before數值為0
+            //(待處理)與東暘協調使用前一天最接近的時刻的數值，
+            //目前先用如果取不到數值(dD_before跟dE_before = 0)，則先用目前的D跟E的值
+            if (dD_before == 0) dD_before = dD;
+            if (dE_before == 0) dE_before = dE;
+
             dH = dD - dD_before;
             dI = dE - dE_before;
 

@@ -118,9 +118,10 @@ namespace M11System
 
         //資料表代碼==BasM11Setting.DataType
         public static string BasM11SettingDataType_SensorObs_num = "SensorObs_num";
+        public static string BasM11SettingDataType_CCD = "CCD";
 
-
-
+        //資料表代碼==BasM11Setting.DataType
+        public static string BasM11SettingDataRemark_PreventPeriodOneMin = "PreventPeriodOneMin";
 
     }
 }

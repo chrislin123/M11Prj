@@ -1,0 +1,92 @@
+﻿
+
+@{
+    ViewBag.Title = "SetPreventPeriodOneMinActive";
+    Layout = "~/Views/Shared/_M11Layout.cshtml";
+}
+
+@section scripts {
+    <script type="text/javascript" src="~/scripts/moment.min.js"></script>
+    <script type="text/javascript" src="~/Scripts/bootstrap-datetimepicker.js"></script>
+    <script type="text/javascript" src="~/Scripts/bootstrap-datepicker/bootstrap-datetimepicker.zh-tw.js"></script>
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/bootstrap-datetimepicker.css" />
+}
+
+<div class="row">
+    <div class="col-md-9">
+        <h1 class="page-header">
+            (測試)CCD防災期間一分鐘傳送啟動設定
+        </h1>
+    </div>
+    <div class="col-md-3">
+        <h1 class="page-header">
+            <Button ID="btnSave" onclick="btnSave();" class="btn btn-success">儲存</Button>
+        </h1>
+    </div>
+</div>
+<div class="panel panel-success">
+    <div class="panel-body">
+        <div class="col-md-12">
+            <div class="row">
+                <table id="tblDefault" class="table table-striped table-condensed">
+                    <thead>
+                        <tr>
+                            <th style="min-width: 80px;">功能</th>
+                            <th style="min-width: 40px;">是否啟用</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>CCD防災期間一分鐘傳送啟動設定</td>
+                            <td>
+                                @if (ViewData["PreventPeriodOneMin"].ToString() == "Y")
+                                {
+                                    <input id="SetActive" type="checkbox" checked="checked" />
+                                }
+                                else
+                                {
+                                    <input id="SetActive" type="checkbox" />
+                                }
+                                
+
+                            </td>
+
+                            </tr>
+                           
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+      });
+
+    function btnSave() {
+        var Active_YN = "N";
+        Active_YN = ($("#SetActive").prop('checked') == true) ? "Y" : "N";
+
+        var BasM11Setting = {};
+        BasM11Setting.DataValue = Active_YN;
+
+        $.ajax({
+            type: "POST",            
+            url : '@Url.Action("SetPreventPeriodOneMinActiveSave", "System")',
+            data: JSON.stringify(BasM11Setting),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (r) {
+                //alert(r.Message);
+                //alert(r + " record(s) inserted.");
+            }
+        });
+    }
+
+</script>
+

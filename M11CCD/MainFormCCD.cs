@@ -72,7 +72,8 @@ namespace M11CCD
                 //ProcGenResultCcd10S(dtCheck);
 
                 //移除CCD資料超過5天的資料(每一小時)
-                ProcRemoveCCD(dtCheck);
+                //20230329 停止存放到5日歷史區
+                //ProcRemoveCCD(dtCheck);
 
                 ShowMessageToFront("轉檔完畢");
 
@@ -209,9 +210,10 @@ namespace M11CCD
                     string sFTPQueueSaveFileFullName = Path.Combine(M11Const.Path_FTPQueueCcdResult, sM11FtpFileName);
                     fi.CopyTo(sFTPQueueSaveFileFullName, true);
 
-                    //儲存到5日歷史區                       
-                    string sCcdResultHistSaveFileFullName = Path.Combine(M11Const.Path_CcdResultHist, sM11FtpFileName);
-                    fi.CopyTo(sCcdResultHistSaveFileFullName, true);
+                    //儲存到5日歷史區
+                    //20230329 停止存放到5日歷史區
+                    //string sCcdResultHistSaveFileFullName = Path.Combine(M11Const.Path_CcdResultHist, sM11FtpFileName);
+                    //fi.CopyTo(sCcdResultHistSaveFileFullName, true);
                    
 
                 }
