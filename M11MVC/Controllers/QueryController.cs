@@ -227,6 +227,10 @@ namespace M11MVC.Controllers
             head.Add("[GPS]方位角(度)");
             head.Add("[GPS]三軸變位速率(mm/天)");
             head.Add("[GPS]平面變位速率(mm/天)");
+            head.Add("[GPS]累積變位量(mm)");
+            head.Add("[GPS]每日解算後E值(M)");
+            head.Add("[GPS]每日解算後N值(M)");
+            head.Add("[GPS]每日解算後H值(M)");
             //TM1
             head.Add("[TM1]方位一觀測值(秒)");
             head.Add("[TM1]方位二觀測值(秒)");
@@ -332,7 +336,7 @@ namespace M11MVC.Controllers
 
                 //[GPS]數據拆開各自一個欄位
                 lstTmp.Clear();
-                for (int i = 0; i < 6; i++)
+                for (int i = 0; i < 10; i++)
                 {
                     lstTmp.Add("");
                 }

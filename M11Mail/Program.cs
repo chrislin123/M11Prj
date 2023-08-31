@@ -16,7 +16,7 @@ namespace M11Mail
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainFormFTP());
+            Application.Run(new MainFormMail());
         }
     }
 }

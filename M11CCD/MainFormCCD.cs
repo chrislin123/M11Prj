@@ -105,8 +105,25 @@ namespace M11CCD
         {
             try
             {
-                //預計排程每分鐘執行一次，每5分鐘的執行
-                if (dtCheck.Minute % 5 != 0) return;
+                ////預計排程每分鐘執行一次，每5分鐘的執行
+                //if (dtCheck.Minute % 5 != 0) return;
+                //20230418 新增由MVC網站設定CCD產生結果間隔(一分鐘、五分鐘)
+                ssql = @"
+                    select * from BasM11Setting where DataType = 'CCD' and DataRemark = 'PreventPeriodOneMin'
+                ";
+
+                BasM11Setting oBasM11Setting = dbDapper.QuerySingleOrDefault<BasM11Setting>(ssql);
+                if (oBasM11Setting != null && oBasM11Setting.DataValue == "Y") //啟動一分鐘上傳一次
+                {
+                    //預計排程每分鐘執行一次，每1分鐘的執行
+                    //if (dtCheck.Minute % 5 != 0) return;
+                }
+                else
+                {
+                    //預計排程每分鐘執行一次，每5分鐘的執行
+                    if (dtCheck.Minute % 5 != 0) return;
+                }
+                
 
                 dtCheck = Utils.getStringToDateTime(dtCheck.ToString("yyyy-MM-dd HH:mm:00"));
                 //20210715 因為盛邦儀器時間不準，所以拉大時間範圍抓影像資料

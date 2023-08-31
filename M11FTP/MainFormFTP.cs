@@ -20,7 +20,7 @@ using Google.Apis.Services;
 using Google.Apis.Util.Store;
 using System.Configuration;
 
-namespace M11FTP
+namespace M11Mail
 {
     public partial class MainFormFTP : BaseForm
     {

@@ -1,6 +1,6 @@
 ﻿namespace M11Mail
 {
-    partial class MainFormFTP
+    partial class MainFormMail
     {
         /// <summary>
         /// Required designer variable.
