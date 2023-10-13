@@ -945,16 +945,23 @@ namespace M11XML
                 string sWaterCgi = "0";
 
                 //水位高(m)	相對水位高(m)
-                // 202106121 新增水位高公式
-                //水位高(m) = -(10-0.1*儀器回傳值)
-                //相對水位高 = 水位高 - 常時水位
+                
                 double dWaterCgi = 0;       //儀器回傳值
                 double dWater = 0;          //水位高
                 double dDefaultWater = 0;   //常時水位
                 double dRelativeWater = 0;  //相對水位高
                 double.TryParse(sWaterCgi, out dWaterCgi);
                 double.TryParse(SensorRow.DefaultWater, out dDefaultWater);
-                dWater = -1 * (10 - (0.1 * dWaterCgi));
+
+                // 202106121 新增水位高公式
+                //水位高(m) = -(10-0.1*儀器回傳值)
+                //相對水位高 = 水位高 - 常時水位                
+                //dWater = -1 * (10 - (0.1 * dWaterCgi));
+                //dRelativeWater = dWater - dDefaultWater;
+                // 20231013 移除水位高公式
+                //水位高(m) = 儀器回傳值
+                //相對水位高 = 水位高 - 常時水位
+                dWater = dWaterCgi;
                 dRelativeWater = dWater - dDefaultWater;
 
                 //四捨五入小數點2位            
@@ -1199,16 +1206,22 @@ namespace M11XML
             }
 
             //水位高(m)	相對水位高(m)
-            // 202106121 新增水位高公式
-            //水位高(m) = -(10-0.1*儀器回傳值)
-            //相對水位高 = 水位高 - 常時水位
             double dWaterCgi = 0;       //儀器回傳值
             double dWater = 0;          //水位高
             double dDefaultWater = 0;   //常時水位
             double dRelativeWater = 0;  //相對水位高
             double.TryParse(sWaterCgi, out dWaterCgi);
             double.TryParse(SensorRow.DefaultWater, out dDefaultWater);
-            dWater = -1 * (10 - (0.1 * dWaterCgi));
+
+            // 202106121 新增水位高公式
+            //水位高(m) = -(10-0.1*儀器回傳值)
+            //相對水位高 = 水位高 - 常時水位                
+            //dWater = -1 * (10 - (0.1 * dWaterCgi));
+            //dRelativeWater = dWater - dDefaultWater;
+            // 20231013 移除水位高公式
+            //水位高(m) = 儀器回傳值
+            //相對水位高 = 水位高 - 常時水位
+            dWater = dWaterCgi;
             dRelativeWater = dWater - dDefaultWater;
 
             //四捨五入小數點2位            
