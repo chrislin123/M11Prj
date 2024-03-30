@@ -505,6 +505,27 @@ namespace M11MVC.Controllers
                 ////建立資料夾
                 Directory.CreateDirectory(sCcdSearchTempPath);
 
+
+                //刪除1天以前的資料               
+                foreach (string fname in Directory.GetFiles(sCcdSearchTempPath))
+                {
+                    try
+                    {
+                        FileInfo fi = new FileInfo(fname);                       
+
+                        if (fi.LastWriteTime < DateTime.Now.AddDays(-3))
+                        {
+                            fi.Delete();
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        //有錯誤持續執行
+                        continue;
+                    }
+                }
+
                 //複製到本機端
                 DateTime dt = DateTime.Now;
                 string sZipFileName = Utils.getDatatimeString(dt, M10Const.DatetimeStringType.ADDT1);
