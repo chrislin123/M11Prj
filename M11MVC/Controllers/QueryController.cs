@@ -9,6 +9,8 @@ using Newtonsoft.Json;
 using M11System;
 using M10.lib;
 using System.IO;
+using System.IO.Compression;
+
 
 namespace M11MVC.Controllers
 {
@@ -26,7 +28,21 @@ namespace M11MVC.Controllers
             //string ssql = @" select * from  BasRainallStation order by SensorName ";
             //List<BasRainallStation> lstBasRain = new List<BasRainallStation>();
             //lstBasRain = dbDapper.Query<BasRainallStation>(ssql);
-           
+
+
+            //ViewData["lstBasRain"] = lstBasRain;
+
+
+            return View();
+        }
+
+        // GET: Query/QueryCcdResult
+        public ActionResult QueryCcdResult()
+        {
+            //string ssql = @" select * from  BasRainallStation order by SensorName ";
+            //List<BasRainallStation> lstBasRain = new List<BasRainallStation>();
+            //lstBasRain = dbDapper.Query<BasRainallStation>(ssql);
+
 
             //ViewData["lstBasRain"] = lstBasRain;
 
@@ -64,7 +80,7 @@ namespace M11MVC.Controllers
             return this.Json(items, JsonRequestBehavior.AllowGet);
         }
 
-        
+
         [HttpGet]
         public JsonResult getQueryXmlResult(string Params)
         {
@@ -85,14 +101,14 @@ namespace M11MVC.Controllers
 
             List<string> lstSensor = new List<string>();
             if (RG == "Y") lstSensor.Add("RG");
-            if (TM == "Y") 
+            if (TM == "Y")
             {
                 lstSensor.Add("TM");
                 //DS011_01該站特殊TM有兩個
                 lstSensor.Add("TM1");
                 lstSensor.Add("TM2");
             }
-            
+
             if (PM == "Y") lstSensor.Add("PM");
             if (GW == "Y") lstSensor.Add("GW");
             if (GPS == "Y") lstSensor.Add("GPS");
@@ -146,14 +162,14 @@ namespace M11MVC.Controllers
 
             List<string> lstSensor = new List<string>();
             if (RG == "Y") lstSensor.Add("RG");
-            if (TM == "Y") 
+            if (TM == "Y")
             {
                 lstSensor.Add("TM");
                 //DS011_01該站特殊TM有兩個
                 lstSensor.Add("TM1");
                 lstSensor.Add("TM2");
             }
-            
+
             if (PM == "Y") lstSensor.Add("PM");
             if (GW == "Y") lstSensor.Add("GW");
             if (GPS == "Y") lstSensor.Add("GPS");
@@ -193,7 +209,7 @@ namespace M11MVC.Controllers
             List<string> head = new List<string>();
             head.Add("潛勢區");
             head.Add("潛勢區名稱");
-            head.Add("測站");       
+            head.Add("測站");
             head.Add("時間");
             //head.Add("數據個數");
             //[RG]
@@ -251,7 +267,7 @@ namespace M11MVC.Controllers
             {
                 List<string> cols = new List<string>();
                 cols.Add(item.SiteID);
-                cols.Add(item.datavalue); 
+                cols.Add(item.datavalue);
                 cols.Add(item.StationID);
                 //cols.Add(item.SensorID);
                 cols.Add(item.DatetimeString);
@@ -399,8 +415,8 @@ namespace M11MVC.Controllers
             string sTempPath = Path.Combine(Server.MapPath("~/temp/"), "QueryXmlResult", sGUID);
             //建立資料夾
             Directory.CreateDirectory(sTempPath);
-            
-            string sFileName = string.Format( "QueryXmlResult_{0}_{1}.xlsx", dtstart.ToString("yyyyMMdd"), dtend.ToString("yyyyMMdd"));
+
+            string sFileName = string.Format("QueryXmlResult_{0}_{1}.xlsx", dtstart.ToString("yyyyMMdd"), dtend.ToString("yyyyMMdd"));
             string sSaveFilePath = Path.Combine(sTempPath, sFileName);
 
             //DataTable dt = Utils.ConvertToDataTable<RainStation>(wrs);
@@ -441,7 +457,142 @@ namespace M11MVC.Controllers
             aResult.Data = sFileDownUrl;
 
             return this.Json(aResult, JsonRequestBehavior.AllowGet);
+
+        }
+
+        [HttpGet]
+        public ActionResult DownCcdData(string Params)
+        {
+
+            string sFileDownUrl = "";
+
+            MVCControlClass.ApiResult aResult = new MVCControlClass.ApiResult();
+
+            dynamic dParams = JsonConvert.DeserializeObject<dynamic>(Params);
+
+            try
+            {
+                //string station = dParams["station"];
+                string sdtstart = dParams["dtstart"];
+                string sdtend = dParams["dtend"];
+                //DateTime dtstart = Utils.getStringToDateTime(sdtstart);
+                //DateTime dtend = Utils.getStringToDateTime(sdtend);
+                //string stimerange = dParams["timerange"];
+
+
+                //站台
+                //string sStation = "DS002_2";
+                string sStation = dParams["station"];
+                sStation = sStation.Split('_')[0] + "_" + sStation.Split('_')[1].Replace("0", "");
+
+                //起始時間
+                //DateTime dtStart = new DateTime(2024, 3, 25);
+                //DateTime dtEnd = new DateTime(2024, 3, 27);
+                DateTime dtStart = Utils.getStringToDateTime(sdtstart);
+                DateTime dtEnd = Utils.getStringToDateTime(sdtend);
+
+
+                //搜尋整點時刻
+                //string sConTime = "12";
+                string sConTime = dParams["timerange"];
+
+                //雲端路徑由設定檔設定                
+                string sCcdHistoryPath = @"G:\我的雲端硬碟\Project\M11\Data\ProjectData\Ccd\CcdHistory";
+                
+                //產生檔案路徑                
+                string sCcdSearchTempPath = Path.Combine(Server.MapPath("~/temp/"), "QueryCcdResult");
+                                
+                ////建立資料夾
+                Directory.CreateDirectory(sCcdSearchTempPath);
+
+                //複製到本機端
+                DateTime dt = DateTime.Now;
+                string sZipFileName = Utils.getDatatimeString(dt, M10Const.DatetimeStringType.ADDT1);
+                string sCcdCurrentPath = Path.Combine(sCcdSearchTempPath, sZipFileName);
+                Directory.CreateDirectory(sCcdCurrentPath);
+
+                for (DateTime dtTrans = dtStart; dtTrans <= dtEnd; dtTrans = dtTrans.AddDays(1))
+                {
+
+                    string sCcdHistoryPathByCond = Path.Combine(sCcdHistoryPath, sStation
+                        , dtTrans.Year.ToString(), dtTrans.Month.ToString().PadLeft(2, '0'), dtTrans.Day.ToString().PadLeft(2, '0'));
+
+                    //檔案格式可能有JPG與JPEG
+                    //處理JPG
+                    string sFileNameByCond = string.Format("{0}-{1}-{2}.jpg", sStation, dtTrans.ToString("yyyyMMdd"), sConTime + "0000");
+
+                    FileInfo fi = new FileInfo(Path.Combine(sCcdHistoryPathByCond, sFileNameByCond));
+
+                    //20240330 **非常重要的設定**
+                    //因為Google Drive資料讀取，使用IIS Apppool/M11MVC的角色權限，無法讀取檔案
+                    //但是在IIS環境設定IIS Apppool，有預設的角色M11MVC
+                    //為了要讀取Google Drive資料，所以需要再IIS Apppool(應用程式集區)，M11MVC修改[進階設定][識別]，改成本機帳號登入(eswcrc2021)
+                    //就可以讀取檔案且複製到目的地
+                    //搞了兩天，終於結案
+
+                    //檔案存在，才執行複製的程序
+                    if (fi.Exists == true)
+                    {
+                        string sRemoteFullPathTest = Path.Combine(sCcdCurrentPath, fi.Name);
+                        ////先刪除
+                        //System.IO.File.Delete(sRemoteFullPathTest);
+                        //在複製
+                        fi.CopyTo(sRemoteFullPathTest, true);
+                    }
+
+                    //處理JPEG
+                    string sFileNameByCondJPEG = string.Format("{0}-{1}-{2}.jpeg", sStation, dtTrans.ToString("yyyyMMdd"), sConTime + "0000");
+
+                    FileInfo fiJPEG = new FileInfo(Path.Combine(sCcdHistoryPathByCond, sFileNameByCondJPEG));
+
+                    //檔案存在，才執行複製的程序
+                    if (fiJPEG.Exists == true)
+                    {
+                        string sRemoteFullPathTestJPEG = Path.Combine(sCcdCurrentPath, fiJPEG.Name);
+                        ////先刪除
+                        //System.IO.File.Delete(sRemoteFullPathTest);
+                        //在複製
+                        fiJPEG.CopyTo(sRemoteFullPathTestJPEG, true);
+                    }
+                }
+
+
+                //--壓縮檔案
+
+                ////產生ZIP檔
+                string PathSource = sCcdCurrentPath;
+                string sFileName1 = string.Format("CCDData-{0}-{1}.zip", sStation, sZipFileName);
+                string PathDest = Path.Combine(sCcdSearchTempPath, sFileName1);
+
+                //檔案存在則先刪除
+                if (System.IO.File.Exists(PathDest) == true)
+                {
+                    new FileInfo(PathDest).Delete();
+                    System.Threading.Thread.Sleep(1000);
+                }
+
+                // 壓縮目錄中檔案
+                ZipFile.CreateFromDirectory(PathSource, PathDest);
+
+
+
+                //產生提供下載的路徑，到前端後，提供下載
+                sFileDownUrl = Request.Url.Scheme + "://" + Request.Url.Authority + Url.Content("~/temp/QueryCcdResult/") + sFileName1;
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
+
+            aResult.ApiResultStauts = "Y";
+            aResult.Data += sFileDownUrl;
             
+
+
+            return this.Json(aResult, JsonRequestBehavior.AllowGet);
+
         }
 
     }
