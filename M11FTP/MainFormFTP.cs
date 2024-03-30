@@ -19,6 +19,7 @@ using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
 using Google.Apis.Util.Store;
 using System.Configuration;
+using System.IO.Compression;
 
 namespace M11Mail
 {
@@ -50,13 +51,13 @@ namespace M11Mail
             ////string[] TotalFiles = Directory.GetFiles(@"I:\我的雲端硬碟\Project\M11\Data\ProjectData\Ccd\CcdHistory\DS144\2021\12\01");
             //string[] TotalFiles = Directory.GetFiles(@"I:\我的雲端硬碟\Project\M11\temp1");
 
-            
+
             //foreach (string fname in TotalFiles)
             //{
             //    try
             //    {
             //        FileInfo fi = new FileInfo(fname);
-                   
+
 
             //        ////--CGI資料上傳到GoogleDrive使用雲端硬碟軟體(複製到硬碟路徑)
             //        //string sStationName = CgiNameSplit[1];
@@ -78,6 +79,14 @@ namespace M11Mail
             //        continue;
             //    }
             //}
+
+            System.IO.File.Copy(@"G:\我的雲端硬碟\Project\M11\Data\ProjectData\Ccd\CcdHistory\DS002_2\2024\03\30\DS002_2-20240330-000000.jpg", @"E:\123.jpg", true);
+
+            return;
+
+
+            //測試用
+            test();
 
 
             timer1.Enabled = true;
@@ -653,6 +662,165 @@ namespace M11Mail
             finally
             {
                
+            }
+
+        }
+
+        /// <summary>
+        /// 測試用
+        /// </summary>
+        private void test()
+        {
+
+
+
+            //站台
+            string sStation = "DS002_2";
+
+            //起始時間
+            DateTime dtStart = new DateTime(2024, 3, 1);
+            DateTime dtEnd = new DateTime(2024, 3, 27);
+
+            //搜尋整點時刻
+            string sConTime = "12";
+
+            //雲端路徑由設定檔設定
+            //string sCcdHistoryPath = @"G:\我的雲端硬碟\Project\M11\Data\ProjectData\Ccd\CcdHistory\DS002_1\";
+            string sCcdHistoryPath = @"G:\我的雲端硬碟\Project\M11\Data\ProjectData\Ccd\CcdHistory";
+            string sCcdSearchTempPath = @"E:\M11\M11TempFile\CCDDownloadTemp\";
+            Directory.CreateDirectory(sCcdSearchTempPath);
+            //複製到本機端
+            DateTime dt = DateTime.Now;
+            string sZipFileName = Utils.getDatatimeString(dt, M10Const.DatetimeStringType.ADDT1);
+            string sCcdCurrentPath = Path.Combine(sCcdSearchTempPath, sZipFileName);
+            Directory.CreateDirectory(sCcdCurrentPath);
+
+
+            for (DateTime dtTrans = dtStart; dtTrans <= dtEnd; dtTrans = dtTrans.AddDays(1))
+            {
+
+                string sCcdHistoryPathByCond = Path.Combine(sCcdHistoryPath, sStation
+                    , dtTrans.Year.ToString(),dtTrans.Month.ToString().PadLeft(2, '0'),dtTrans.Day.ToString().PadLeft(2, '0'));
+                string sFileNameByCond = string.Format("{0}-{1}-{2}.jpg", sStation, dtTrans.ToString("yyyyMMdd"), sConTime + "0000");
+
+
+                FileInfo fi = new FileInfo(Path.Combine(sCcdHistoryPathByCond, sFileNameByCond));                
+
+                //檔案存在，才執行複製的程序
+                if (fi.Exists == true)
+                {
+                    string sRemoteFullPathTest = Path.Combine(sCcdCurrentPath, fi.Name);
+                    //先刪除
+                    System.IO.File.Delete(sRemoteFullPathTest);                    
+                    //在複製
+                    fi.CopyTo(sRemoteFullPathTest, true);
+                }
+            }
+
+
+            //--壓縮檔案
+
+            ////產生ZIP檔
+            string PathSource = sCcdCurrentPath;
+            string sFileName = string.Format("CCDData_{0}.zip", sZipFileName);
+            string PathDest = Path.Combine(sCcdSearchTempPath, sFileName);
+
+            //檔案存在則先刪除
+            if (System.IO.File.Exists(PathDest) == true)
+            {
+                new FileInfo(PathDest).Delete();
+                System.Threading.Thread.Sleep(1000);
+            }
+
+            // 壓縮目錄中檔案
+            ZipFile.CreateFromDirectory(PathSource, PathDest);
+
+            //System.IO.Compression.ZipFile
+            //提供下載
+
+
+
+
+
+
+
+
+
+            //string sCcdHistoryPath = ConfigurationManager.AppSettings["PathGoogleDriveCcdHistory"];
+
+            try
+            {
+                string[] TotalFilesTest = Directory.GetFiles(sCcdHistoryPath, "*.*", SearchOption.AllDirectories);
+
+                
+                
+                
+
+
+                
+
+                
+
+
+                
+
+
+                //使用搜尋條件，搜尋檔案
+                //
+
+                
+
+
+
+
+                //// 取得資料夾內所有檔案
+                //int iIndex = 1;
+                //string[] TotalFiles = Directory.GetFiles(M11Const.Path_FTPQueueCcdResult, "*.*", SearchOption.AllDirectories);
+                ////string[] TotalFiles = Directory.GetFiles(M11Const.Path_FTPQueueCcdResult);
+                //foreach (string fname in TotalFiles)
+                //{
+                //    try
+                //    {
+                //        FileInfo fi = new FileInfo(fname);
+                //        string[] CcdNameSplit = fi.Name.Replace(fi.Extension, "").Split('-');
+
+                //        //避免舊檔案格式問題，排除沒有分析完整的檔案名稱
+                //        if (CcdNameSplit.Length != 3) continue;
+
+                //        string sStationName = CcdNameSplit[0];
+                //        string sDataTime = CcdNameSplit[1] + CcdNameSplit[2];
+                //        if (CcdNameSplit[1].Length != 8) continue; //日期格式不符合
+                //        if (CcdNameSplit[2].Length != 6) continue; //時間格式不符合
+
+                //        //從檔案取得資料時間
+                //        DateTime dt = Utils.getStringToDateTime(sDataTime);
+
+                //        string sLocalPath = fi.FullName;
+                //        string sRemotePath = Path.Combine(sCcdHistoryPath, sStationName, dt.ToString("yyyy"), dt.ToString("MM"), dt.ToString("dd"));
+                //        string sRemoteFullPath = Path.Combine(sRemotePath, fi.Name);
+
+                //        //建立檔案路徑
+                //        Directory.CreateDirectory(sRemotePath);
+
+                //        //複製檔案到路徑中
+                //        fi.CopyTo(sRemoteFullPath, true);
+
+                //        ShowMessageToFront(string.Format("[{0}/{1}]移動CCD檔案到GoogleDrive資料夾 成功=={2}", iIndex.ToString(), TotalFiles.Length, fname));
+                //        iIndex++;
+
+                //        //刪除已處理資料
+                //        fi.Delete();
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        //有錯誤持續執行
+                //        continue;
+                //    }
+                //}
+            }
+            finally
+            {
+
             }
 
         }
