@@ -114,7 +114,7 @@
 
         //下拉選單
         @**@
-        $.getJSON('@Url.Action("QueryXmlResultGetStationDDL")', { cityId: "test" }, function (data) {
+        $.getJSON('@Url.Action("QueryCcdStationDDL")', { cityId: "test" }, function (data) {
             $('#station').empty();
             $.each(data, function (i, item) {
                 $('#station').append($('<option></option>').val(item.Value).text(item.Text));

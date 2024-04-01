@@ -80,6 +80,41 @@ namespace M11MVC.Controllers
             return this.Json(items, JsonRequestBehavior.AllowGet);
         }
 
+        /// <summary>
+        /// 取得所有CCD站台下拉選單
+        /// </summary>
+        /// <returns></returns>
+        public JsonResult QueryCcdStationDDL()
+        {
+            List<SelectListItem> items = new List<SelectListItem>();
+
+            ssql = @"
+                SELECT b.DataValue,a.DataItem FROM BasM11Setting a
+                left join BasM11Setting b on a.DataRemark = b.dataitem and b.datatype = 'SiteCName'
+                where a.DataType = 'stmapccdprocal'
+                order by a.DataItem
+            ";
+
+            var Stations = dbDapper.Query(ssql);
+
+            foreach (var item in Stations)
+            {
+                items.Add(new SelectListItem()
+                {
+                    Text = string.Format("[{0}]{1}", item.DataValue, item.DataItem),
+                    Value = item.DataItem
+                });
+            }
+
+            //if (Countrys.Count != 0)
+            //{
+            //    items.Insert(0, new SelectListItem() { Text = "全部", Value = "全部" });
+            //}
+
+
+            return this.Json(items, JsonRequestBehavior.AllowGet);
+        }
+
 
         [HttpGet]
         public JsonResult getQueryXmlResult(string Params)
