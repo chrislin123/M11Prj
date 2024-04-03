@@ -518,7 +518,10 @@ namespace M11MVC.Controllers
                 //站台
                 //string sStation = "DS002_2";
                 string sStation = dParams["station"];
-                sStation = sStation.Split('_')[0] + "_" + sStation.Split('_')[1].Replace("0", "");
+                if (sStation.Split('_').Length == 2)
+                {
+                    sStation = sStation.Split('_')[0] + "_" + sStation.Split('_')[1].Replace("0", "");
+                }
 
                 //起始時間
                 //DateTime dtStart = new DateTime(2024, 3, 25);
