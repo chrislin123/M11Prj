@@ -42,43 +42,7 @@ namespace M11XML
             Directory.CreateDirectory(M11Const.Path_FTPQueueGPSData);
 
 
-            //DateTime dtCheck = new DateTime(2022, 3, 10, 0, 0, 8);
-
-            //if (dtCheck.Hour == 0 && dtCheck.Minute == 0)
-            //{
-            //    DateTime dtPreTime = dtCheck.AddMinutes(-10);
-               
-            //}
-
-            //string sPath = @"D:\Temp\pmhist\";
-            //string[] aFiles = Directory.GetFiles(sPath);
-            //// 取得資料夾內所有檔案
-            //foreach (string fname in aFiles)
-            //{
-            //    FileInfo fi = new FileInfo(fname);
-
-            //    string[] pfname = fi.Name.Split('_');
-
-
-            //    dtCheck = Utils.getStringToDateTime(pfname[0]+"00");
-
-            //    //1.建立路徑
-            //    string Web7DaySavePath = Path.Combine(sPath, dtCheck.ToString("yyyy"), dtCheck.ToString("MMdd"));
-            //    Directory.CreateDirectory(Web7DaySavePath);
-            //    //2.存放資料
-            //    //doc.Save(Path.Combine(Web7DaySavePath, string.Format("{0}_{1}", dtCheck.ToString("HHmm"), "PrecipitationToday.xml")));
-
-
-            //    string sFTPQueueSaveFileFullName = Path.Combine(Web7DaySavePath, string.Format("{0}_{1}", dtCheck.ToString("HHmm"), "PrecipitationToday.xml"));
-            //    File.Delete(sFTPQueueSaveFileFullName);
-            //    fi.MoveTo(sFTPQueueSaveFileFullName);
-            //    //fi.CopyTo(sFTPQueueSaveFileFullName, true);
-
-
-            //}
-
-            //MessageBox.Show("完成");
-            //return;
+            
 
             timer1.Enabled = true;
         }
@@ -94,6 +58,11 @@ namespace M11XML
                 DateTime dtCheck = DateTime.Now;
 
                 //測試
+
+                //讀取GPS原始資料轉檔到DB資料庫-成大千磯GPS-郭博士
+                ReadGPSDataToDB(dtCheck);
+
+
                 //dtCheck = new DateTime(2023, 3, 29, 22 ,40, 8);
 
                 //20220516 氣象局產生資料優先產生，往前挪到水保局XML之前處理
@@ -2807,7 +2776,10 @@ namespace M11XML
 
             string StationName = CgiNameSplit[0];
 
-            DateTime dt = Utils.getStringToDateTime(CgiNameSplit[2]);                        
+            DateTime dt = Utils.getStringToDateTime(CgiNameSplit[2]);
+            //20250203 由於GPS傳送過來的時刻，已經超過產生XML的時間導致資料都讀到上個時段資料
+            //所以此時刻GPS傳送過來的時間點納入下個時段(+10M)
+            dt = dt.AddMinutes(10);
             string sDatetimeString = M11DatetimeToString(dt);
 
             //取得下一個時段資料庫資料
